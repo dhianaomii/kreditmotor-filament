@@ -1,0 +1,229 @@
+@extends('fe.master')
+
+@section('navbar')
+    @include('fe.navbar')
+@endsection
+
+@section('content')
+
+<div class="container-fluid bg-breadcrumb">
+    <div class="container text-center py-5" style="max-width: 900px;">
+        <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Pengajuan Kredit Motor</h4>  
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0 fw-bold text-dark-blue">Pengajuan Kredit Motor</h2>
+        <a href="{{ route('product') }}" class="btn btn-outline-red">
+            <i class="bi bi-arrow-left me-2"></i>Kembali Belanja
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="product-title-bar">
+                    <h4 class="mb-0 text-white">
+                        <i class="bi bi-clipboard-check me-2"></i>
+                        List Pengajuan Kredit Motor
+                    </h4>
+                    <div>
+                        <i class="bi bi-cart3 text-danger fs-4"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- SweetAlert untuk notifikasi -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            @if (session('success'))
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: '{{ session('success') }}',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#3085d6'
+                                });
+                            @endif
+                            @if (session('error'))
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal!',
+                                    text: '{{ session('error') }}',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#d33'
+                                });
+                            @endif
+                        });
+                    </script>
+
+                    @if($pengajuan->isNotEmpty())
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15%;">Status Pengajuan</th>
+                                        <th style="width: 15%;">Motor</th>
+                                        <th style="width: 15%">Harga Kredit</th>
+                                        <th style="width: 12%">Lama Cicilan</th>
+                                        <th style="width: 15%">DP</th>
+                                        <th style="width: 15%">Cicilan Perbulan</th>
+                                        <th style="width: 15%">Biaya Asuransi Perbulan</th>
+                                        <th style="width: 10%;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($pengajuan as $item)
+                                        <tr>
+                                            <td>
+                                                <span class="badge bg-primary p-2">{{ $item->status_pengajuan }}</span>
+                                            </td>
+                                            <td class="fw-bold">{{ $item->motor->nama_motor ?? '-' }}</td>
+                                            <td>IDR {{ number_format($item->harga_kredit, 2, ',', '.') }}</td>
+                                            <td>{{ $item->jenisCicilan->lama_cicilan ?? '-' }} bulan</td>
+                                            <td>IDR {{ number_format($item->dp, 2, ',', '.') }}</td>
+                                            <td class="fw-bold text-danger">IDR {{ number_format($item->cicilan_perbulan, 2, ',', '.') }}</td>
+                                            <td>IDR {{ number_format($item->biaya_asuransi_perbulan, 2, ',', '.') }}</td>
+                                            <td>
+                                                <div class="d-flex gap-2 text-center">
+                                                    @if($item->status_pengajuan == 'Menunggu Konfirmasi' || $item->status_pengajuan == 'Diproses')
+                                                        <form action="{{ route('pengajuan.cancel', $item->id) }}" method="POST" class="cancel-form">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" class="btn btn-outline-danger btn-sm cancel-btn">
+                                                                <i class="bi bi-x-circle me-2"></i>Batalkan
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                    @if($item->status_pengajuan == 'Diproses')
+                                                        <a href="{{ route('pengajuan.create', $item->id) }}" class="btn btn-red btn-sm">
+                                                            <i class="bi bi-credit-card me-2"></i>Bayar
+                                                        </a>
+                                                    @elseif($item->status_pengajuan == 'Diterima')
+                                                        <a href="{{ route('cicilan', $item->id) }}" class="btn btn-red btn-sm">
+                                                            <i class="bi bi-info-circle me-2"></i>Lihat Detail
+                                                        </a>
+                                                        {{-- @if(!$item->kredit || !$item->kredit->pengiriman)
+                                                            @php
+                                                                $pelanggan = Auth::guard('pelanggan')->user();
+                                                                $hasAlamat = $pelanggan->hasAlamat();
+                                                            @endphp
+                                                            @if($hasAlamat)
+                                                                <!-- Modal untuk memilih tanggal jika sudah ada alamat -->
+                                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#jadwalModal{{ $item->id }}">
+                                                                    <i class="bi bi-truck me-2"></i>Jadwalkan Pengiriman
+                                                                </button>
+                                                                <!-- Modal -->
+                                                                <div class="modal fade" id="jadwalModal{{ $item->id }}" tabindex="-1" aria-labelledby="jadwalModalLabel" aria-hidden="true">
+                                                                    <div class="modal-dialog">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h5 class="modal-title" id="jadwalModalLabel">Pilih Tanggal Pengiriman</h5>
+                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                            </div>
+                                                                            <form action="{{ route('kirim.store', $item->id) }}" method="POST">
+                                                                                @csrf
+                                                                                <div class="modal-body">
+                                                                                    <div class="mb-3">
+                                                                                        <label for="tanggal_pengiriman" class="form-label">Tanggal Pengiriman</label>
+                                                                                        <input type="date" class="form-control" id="tanggal_pengiriman" name="tanggal_pengiriman" 
+                                                                                            value="{{ \Carbon\Carbon::today()->addDays(1)->format('Y-m-d') }}" 
+                                                                                            min="{{ \Carbon\Carbon::today()->addDays(1)->format('Y-m-d') }}" required>
+                                                                                    </div>
+                                                                                    <div class="mb-3">
+                                                                                        <label class="form-label">Alamat Pengiriman</label>
+                                                                                        <textarea class="form-control" readonly>{{ $pelanggan->alamat_utama }}</textarea>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="modal-footer">
+                                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                                                    <button type="submit" class="btn btn-primary">Jadwalkan</button>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            @else
+                                                                <!-- Jika tidak ada alamat, ke form create -->
+                                                                <a href="{{ route('kirim.create', $item->id) }}" class="btn btn-outline-primary btn-sm">
+                                                                    <i class="bi bi-truck me-2"></i>Jadwalkan Pengiriman
+                                                                </a>
+                                                            @endif
+                                                        @endif --}}
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="bi bi-cart-x text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="mt-3 mb-2">List pengajuan kredit Anda kosong</h5>
+                            <p class="text-muted mb-4">Silakan pilih motor yang ingin Anda ajukan kredit</p>
+                            <a href="{{ route('product') }}" class="btn btn-red">
+                                <i class="bi bi-motorcycle me-2"></i>Lihat Katalog Motor
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert untuk konfirmasi pembatalan -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.cancel-btn').forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const form = this.closest('.cancel-form');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Konfirmasi Pembatalan',
+                        text: 'Apakah Anda yakin ingin membatalkan pengajuan ini?',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Batalkan',
+                        cancelButtonText: 'Tidak',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Efek transisi fade-out untuk semua link dengan kelas 'read-more' dan tombol checkout
+        document.querySelectorAll('.read-more, .btn-red, .btn-outline-red').forEach(link => {
+            link.addEventListener('click', function(event) {
+                // Hanya terapkan efek jika link adalah <a> atau bukan tombol hapus
+                if (this.tagName === 'A' && !this.closest('form')) {
+                    event.preventDefault();
+                    const href = this.getAttribute('href');
+                    document.body.classList.add('fade-out');
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 500);
+                }
+            });
+        });
+
+        // Script untuk menghilangkan spinner setelah halaman selesai dimuat
+        window.addEventListener('load', function () {
+            const spinner = document.getElementById('spinner');
+            if (spinner) {
+                spinner.classList.remove('show');
+            }
+        });
+    </script>
+@endsection

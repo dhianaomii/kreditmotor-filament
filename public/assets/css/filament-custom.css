@@ -1,0 +1,30 @@
+/* Tombol Primary */
+button.fi-btn.fi-btn-color-primary.fi-color-primary,
+a.fi-btn.fi-btn-primary {
+    background-color: #4b49ac !important; /* Ganti dengan warna merah sebagai contoh */
+    border-color: #4b49ac !important;
+}
+
+span.filepond--label-action {
+    color: #4b49ac !important;
+}
+
+.fi-fo-wizard-header-step-label{
+    color: #4b49ac !important;
+}
+
+.fi-fo-wizard-header-step-icon-ctn{
+    border: 1px solid #4B49AC !important;
+    color: #4b49ac !important;  
+    /* background-color: #4b49ac; */
+}
+.fi-fo-wizard-header-step-indicator{
+    color: #4b49ac !important;  
+
+}
+.fi-icon-btn-icon{
+    color: #4b49ac !important;  
+}
+/* svg.fi-icon-btn-icon{
+    background-color: #4B49AC !important;
+} */
