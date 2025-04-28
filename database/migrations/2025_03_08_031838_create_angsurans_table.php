@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('angsuran_ke');
             $table->double('total_bayar');
             $table->text('keterangan');
+            $table->string('bukti_angsuran');
             $table->timestamps();
         });
     }

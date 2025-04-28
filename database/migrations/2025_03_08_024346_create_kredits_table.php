@@ -18,11 +18,11 @@ return new class extends Migration
             $table->unsignedBigInteger('metode_pembayaran_id');
             $table->foreign('metode_pembayaran_id')->references('id')->on('metode_pembayarans');
             $table->date('tgl_mulai_kredit');
-            $table->date('tgl-_selesai_kredit');
+            $table->date('tgl_selesai_kredit');
             $table->string('url_bukti_bayar');
             $table->double('sisa_kredit');
             $table->enum('status_kredit', ['Dicicil','Macet', 'Lunas']);
-            $table->string('keterangan_status_kredit');
+            $table->string('keterangan_status_kredit')->nullable();
             $table->timestamps();
         });
     }
