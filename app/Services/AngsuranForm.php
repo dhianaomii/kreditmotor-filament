@@ -35,6 +35,12 @@ final class AngsuranForm {
                     ->step('0.01')
                     ->prefix('Rp') // Optional
                     ->inputMode('decimal'),
+                FileUpload::make('bukti_angsuran')
+                    ->label('Bukti Pembayaran')
+                    ->image()
+                    ->disk('public')
+                    ->directory('bukti_angsuran')
+                    ->visibility('public'),
                 TextInput::make('keterangan')
                     ->label('Keterangan')
                     ->required()

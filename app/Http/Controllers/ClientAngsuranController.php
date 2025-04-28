@@ -27,15 +27,10 @@ class ClientAngsuranController extends Controller
     public function store(Request $request, $pengajuanId)
     {
         try {
-            // Log input awal
-            Log::info('Menerima input angsuran', $request->all());
-
-            // Bersihkan jumlah_bayar
             $request->merge([
                 'jumlah_bayar' => str_replace(['.', ','], '', $request->jumlah_bayar)
             ]);
 
-            // Validasi input
             $validated = $request->validate([
                 'bulan' => [
                     'required',
@@ -55,9 +50,9 @@ class ClientAngsuranController extends Controller
                     },
                 ],
                 'jumlah_bayar' => 'required|numeric|min:0',
+                'bukti_angsuran' => 'required|file|mimes:jpeg,png,jpg,gif|max:2048',
             ]);
 
-            // Ambil data pengajuan dan kredit
             $pengajuan = PengajuanKredit::findOrFail($pengajuanId);
             $kredit = Kredit::where('pengajuan_kredit_id', $pengajuan->id)->firstOrFail();
             Log::info('Data ditemukan', [
@@ -65,46 +60,27 @@ class ClientAngsuranController extends Controller
                 'kredit_id' => $kredit->id
             ]);
 
-            // Hitung angsuran_ke
             $angsuranTerakhir = Angsuran::where('kredit_id', $kredit->id)->latest()->first();
             $angsuranKe = $angsuranTerakhir ? $angsuranTerakhir->angsuran_ke + 1 : 1;
 
-            // Siapkan data angsuran
             $data = [
                 'kredit_id' => $kredit->id,
                 'tgl_bayar' => $validated['bulan'], // Gunakan bulan dari input
                 'angsuran_ke' => $angsuranKe,
                 'total_bayar' => $validated['jumlah_bayar'],
+                'bukti_angsuran' => $request->file('bukti_angsuran')->store('bukti_angsuran', 'public'),
                 'keterangan' => 'Pembayaran angsuran untuk bulan ' . Carbon::parse($validated['bulan'])->translatedFormat('F Y'),
-            ];
+            ];            
 
-            // Log data sebelum simpan
-            Log::info('Data angsuran yang akan disimpan', $data);
-
-            // Simpan angsuran
             $angsuran = Angsuran::create($data);
-            Log::info('Angsuran berhasil disimpan', ['id' => $angsuran->id]);
-
-            // Cek apakah semua angsuran sudah dilunasi
+            
             $totalAngsuran = Angsuran::where('kredit_id', $kredit->id)->count();
             $lamaCicilan = $pengajuan->jenisCicilan->lama_cicilan;
-
-            Log::info('Cek status lunas', [
-                'pengajuan_id' => $pengajuan->id,
-                'kredit_id' => $kredit->id,
-                'total_angsuran' => $totalAngsuran,
-                'lama_cicilan' => $lamaCicilan
-            ]);
 
             if ($totalAngsuran >= $lamaCicilan && $kredit->status_kredit !== 'Lunas') {
                 $kredit->update([
                     'status_kredit' => 'Lunas',
                     'updated_at' => now(),
-                ]);
-                Log::info('Status kredit diperbarui ke Lunas', [
-                    'kredit_id' => $kredit->id,
-                    'total_angsuran' => $totalAngsuran,
-                    'lama_cicilan' => $lamaCicilan
                 ]);
 
                 return redirect()->route('cicilan', $pengajuan->id)
@@ -114,14 +90,14 @@ class ClientAngsuranController extends Controller
             return redirect()->route('cicilan', $pengajuan->id)
                 ->with('success', 'Pembayaran angsuran berhasil disimpan.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validasi gagal', ['errors' => $e->errors()]);
+            // Log::error('Validasi gagal', ['errors' => $e->errors()]);
             return redirect()->back()->withErrors($e->validator)->withInput();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Data tidak ditemukan', ['message' => $e->getMessage()]);
+            // Log::error('Data tidak ditemukan', ['message' => $e->getMessage()]);
             return redirect()->route('cicilan', $pengajuanId)
                 ->with('error', 'Pengajuan atau kredit tidak ditemukan.');
         } catch (\Exception $e) {
-            Log::error('Gagal menyimpan angsuran', ['message' => $e->getMessage()]);
+            // Log::error('Gagal menyimpan angsuran', ['message' => $e->getMessage()]);
             return redirect()->route('cicilan', $pengajuanId)
                 ->with('error', 'Gagal menyimpan angsuran: ' . $e->getMessage());
         }

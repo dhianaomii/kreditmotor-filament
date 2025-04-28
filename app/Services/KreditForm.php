@@ -41,7 +41,7 @@ final class KreditForm{
                     ->label('Bukti Bayar DP')
                     ->image()
                     ->disk('public')
-                    ->directory('photos')
+                    ->directory('bukti_bayar')
                     ->visibility('public'),
                 TextInput::make('sisa_kredit')
                     ->label('Sisa Kredit')

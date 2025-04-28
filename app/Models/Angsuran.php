@@ -16,6 +16,7 @@ class Angsuran extends Model
         'tgl_bayar',
         'angsuran_ke',
         'total_bayar',
+        'bukti_angsuran',
         'keterangan',
     ];
 

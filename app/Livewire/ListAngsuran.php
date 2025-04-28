@@ -16,6 +16,7 @@ use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Enums\ActionsPosition;
+use Filament\Tables\Columns\ImageColumn;
 use Livewire\Component;
 
 class ListAngsuran extends Component implements HasTable, HasForms
@@ -61,6 +62,8 @@ class ListAngsuran extends Component implements HasTable, HasForms
                 TextColumn::make('total_bayar')
                     ->money('IDR')
                     ->label('Total Bayar'),
+                ImageColumn::make('bukti_angsuran')
+                    ->label('Bukti Angsuran'),
                 TextColumn::make('keterangan')
                     ->label('Keterangan'),
             ])

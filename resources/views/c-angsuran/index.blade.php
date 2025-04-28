@@ -208,84 +208,92 @@
         </div>
     </div>
 
-    <!-- Modal Bayar Angsuran -->
-    <div class="modal fade" id="modalBayarAngsuran" tabindex="-1" aria-labelledby="modalBayarAngsuranLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <!-- Modal Header with Gradient Background -->
-                <div class="modal-header bg-dark">
-                    <h5 class="modal-title text-white fw-bold" id="modalBayarAngsuranLabel">
-                        <i class="bi bi-credit-card-2-front me-2"></i>Bayar Angsuran
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+  <!-- Modal Bayar Angsuran -->
+<div class="modal fade" id="modalBayarAngsuran" tabindex="-1" aria-labelledby="modalBayarAngsuranLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <!-- Modal Header with Gradient Background -->
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title text-white fw-bold" id="modalBayarAngsuranLabel">
+                    <i class="bi bi-credit-card-2-front me-2"></i>Bayar Angsuran
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <!-- Modal Body with Card Style Elements -->
+            <div class="modal-body">
+                <div class="mb-3 px-2">
+                    <h6 class="mb-0 fw-bold">Informasi Pembayaran</h6>
+                    <p class="text-muted small mb-0">Silakan pilih bulan angsuran dan unggah bukti pembayaran</p>
                 </div>
-                
-                <!-- Modal Body with Card Style Elements -->
-                <div class="modal-body">
-                    <div class="mb-3 px-2">
-                        <h6 class="mb-0 fw-bold">Informasi Pembayaran</h6>
-                        <p class="text-muted small mb-0">Silakan pilih bulan angsuran yang akan dibayar</p>
+
+                <form id="formBayarAngsuran" action="{{ route('cicilan.store', $kredit->PengajuanKredit->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="bulan" class="form-label fw-semibold">
+                            <i class="bi bi-calendar3 me-1 text-danger"></i>Bulan Angsuran
+                        </label>
+                        <select class="form-select form-select-md border" id="bulan" name="bulan" required>
+                            <option value="">-- Pilih Bulan Angsuran --</option>
+                            @php
+                                $lamaCicilan = $kredit->PengajuanKredit->jenisCicilan->lama_cicilan;
+                                $angsuranTerbayar = $angsuranList->pluck('tgl_bayar')->map(function($tgl) {
+                                    return $tgl ? \Carbon\Carbon::parse($tgl)->format('Y-m') : null;
+                                })->filter()->toArray();
+                                $tanggalMulai = \Carbon\Carbon::parse($kredit->PengajuanKredit->tanggal_disetujui ?? $kredit->PengajuanKredit->tgl_pengajuan_kredit ?? now());
+                                $bulanTersedia = [];
+                                for ($i = 0; $i < $lamaCicilan; $i++) {
+                                    $bulan = $tanggalMulai->copy()->addMonths($i);
+                                    $bulanFormat = $bulan->format('Y-m');
+                                    if (!in_array($bulanFormat, $angsuranTerbayar)) {
+                                        $bulanTersedia[] = [
+                                            'value' => $bulan->startOfMonth()->format('Y-m-d'),
+                                            'label' => $bulan->translatedFormat('F Y'),
+                                        ];
+                                    }
+                                }
+                            @endphp
+                            @foreach($bulanTersedia as $bulan)
+                                <option value="{{ $bulan['value'] }}">{{ $bulan['label'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="jumlah_bayar" class="form-label fw-semibold">
+                            <i class="bi bi-cash-stack me-1 text-danger"></i>Jumlah Bayar
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white fw-bold">Rp</span>
+                            <input type="text" class="form-control bg-white border" id="jumlah_bayar" name="jumlah_bayar" value="{{ number_format($kredit->PengajuanKredit->cicilan_perbulan, 0, ',', '.') }}" readonly>
+                        </div>
+                        <div class="form-text text-end">Total angsuran yang harus dibayar bulan ini</div>
                     </div>
 
-                    <form id="formBayarAngsuran" action="{{ route('cicilan.store', $kredit->PengajuanKredit->id) }}" method="POST">
-                        @csrf
-                        <div class="mb-4">
-                            <label for="bulan" class="form-label fw-semibold">
-                                <i class="bi bi-calendar3 me-1 text-danger"></i>Bulan Angsuran
-                            </label>
-                            <select class="form-select form-select-md border" id="bulan" name="bulan" required>
-                                <option value="">-- Pilih Bulan Angsuran --</option>
-                                @php
-                                    $lamaCicilan = $kredit->PengajuanKredit->jenisCicilan->lama_cicilan;
-                                    $angsuranTerbayar = $angsuranList->pluck('tgl_bayar')->map(function($tgl) {
-                                        return $tgl ? \Carbon\Carbon::parse($tgl)->format('Y-m') : null;
-                                    })->filter()->toArray();
-                                    $tanggalMulai = \Carbon\Carbon::parse($kredit->PengajuanKredit->tanggal_disetujui ?? $kredit->PengajuanKredit->tgl_pengajuan_kredit ?? now());
-                                    $bulanTersedia = [];
-                                    for ($i = 0; $i < $lamaCicilan; $i++) {
-                                        $bulan = $tanggalMulai->copy()->addMonths($i);
-                                        $bulanFormat = $bulan->format('Y-m');
-                                        if (!in_array($bulanFormat, $angsuranTerbayar)) {
-                                            $bulanTersedia[] = [
-                                                'value' => $bulan->startOfMonth()->format('Y-m-d'),
-                                                'label' => $bulan->translatedFormat('F Y'),
-                                            ];
-                                        }
-                                    }
-                                @endphp
-                                @foreach($bulanTersedia as $bulan)
-                                    <option value="{{ $bulan['value'] }}">{{ $bulan['label'] }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        <div class="mb-2">
-                            <label for="jumlah_bayar" class="form-label fw-semibold">
-                                <i class="bi bi-cash-stack me-1 text-danger"></i>Jumlah Bayar
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-white fw-bold">Rp</span>
-                                <input type="text" class="form-control bg-white border" id="jumlah_bayar" name="jumlah_bayar" value="{{ number_format($kredit->PengajuanKredit->cicilan_perbulan, 0, ',', '.') }}" readonly>
-                            </div>
-                            <div class="form-text text-end">Total angsuran yang harus dibayar bulan ini</div>
-                        </div>
-                    </form>
-                </div>
-                
-                <!-- Modal Footer with Enhanced Buttons -->
-                <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                    <div class="d-flex w-100 gap-2">
-                        <button type="button" class="btn btn-outline-secondary flex-fill py-2" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle me-1"></i>Batal
-                        </button>
-                        <button type="submit" form="formBayarAngsuran" class="btn btn-danger flex-fill py-2">
-                            <i class="bi bi-check2-circle me-1"></i>Bayar Sekarang
-                        </button>
+                    <div class="mb-4">
+                        <label for="bukti_angsuran" class="form-label fw-semibold">
+                            <i class="bi bi-file-earmark-arrow-up me-1 text-danger"></i>Bukti Pembayaran
+                        </label>
+                        <input type="file" class="form-control" id="bukti_angsuran" name="bukti_angsuran" accept="image/jpeg,image/png,image/jpg,image/gif" required>
+                        <div class="form-text">Unggah file dalam format JPEG, PNG, JPG, atau GIF (maks. 2MB).</div>
                     </div>
+                </form>
+            </div>
+            
+            <!-- Modal Footer with Enhanced Buttons -->
+            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                <div class="d-flex w-100 gap-2">
+                    <button type="button" class="btn btn-outline-secondary flex-fill py-2" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Batal
+                    </button>
+                    <button type="submit" form="formBayarAngsuran" class="btn btn-danger flex-fill py-2">
+                        <i class="bi bi-check2-circle me-1"></i>Bayar Sekarang
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
