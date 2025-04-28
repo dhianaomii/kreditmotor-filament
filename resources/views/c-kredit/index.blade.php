@@ -174,6 +174,109 @@
             </div>
         </div>
     </div>
+    <!-- Tambahkan tabel pengiriman di bawah card pengajuan -->
+<div class="card mb-4 mt-4">
+    <div class="product-title-bar">
+        <h4 class="mb-0 text-white">
+            <i class="bi bi-truck me-2"></i>
+            List Pengiriman
+        </h4>
+        <div>
+            <i class="bi bi-box-seam text-danger fs-4"></i>
+        </div>
+    </div>
+    <div class="card-body">
+        @if($pengiriman->isNotEmpty())
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">No. Invoice</th>
+                            <th style="width: 20%;">Motor</th>
+                            <th style="width: 15%;">Tanggal Pengiriman</th>
+                            <th style="width: 25%;">Alamat Pengiriman</th>
+                            <th style="width: 15%;">Status Pengiriman</th>
+                            <th style="width: 10%;">Bukti Pengiriman</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($pengiriman as $item)
+                            <tr>
+                                <td>{{ $item->no_invoice ?? '-' }}</td>
+                                <td class="fw-bold">
+                                    {{ $item->kredit->PengajuanKredit->motor->nama_motor ?? '-' }}
+                                </td>
+                                <td>
+                                    {{ $item->tgl_kirim ? \Carbon\Carbon::parse($item->tgl_kirim)->format('d M Y') : '-' }}
+                                </td>
+                                <td>{{Auth::user()->alamat1}}, {{Auth::user()->kota1}}, {{Auth::user()->provinsi1}}, {{Auth::user()->kode_pos1}}</td>
+                                <td>
+                                    <span class="badge bg-{{ $item->status_kirim == 'Tiba Ditujuan' ? 'success' : ($item->status_kirim == 'Sedang Dikirim' ? 'primary' : 'primary') }} p-2">
+                                        {{ $item->status_kirim ?? '-' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($item->bukti_foto)
+                                        <!-- Tombol untuk memicu modal -->
+                                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#buktiModal{{ $item->id }}">
+                                            <i class="bi bi-file-earmark-image me-2"></i> Lihat Bukti
+                                        </button>
+                                
+                                        <!-- Modal untuk menampilkan bukti pengiriman -->
+                                        <div class="modal fade" id="buktiModal{{ $item->id }}" tabindex="-1" aria-labelledby="buktiModalLabel{{ $item->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="buktiModalLabel{{ $item->id }}">Bukti Pengiriman - {{ $item->no_invoice ?? '-' }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body text-center">
+                                                        <img src="{{ asset('storage/' . $item->bukti_foto) }}" alt="Bukti Pengiriman" class="img-fluid" style="max-height: 500px; object-fit: contain;">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Belum Ada Bukti Pengiriman</span>
+                                    @endif
+                                </td>
+
+                                {{-- <td>
+                                    <div class="d-flex gap-2 text-center">
+                                        @if($item->status_pengiriman == 'Dalam Proses')
+                                            <form action="{{ route('pengiriman.cancel', $item->id) }}" method="POST" class="cancel-pengiriman-form">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-outline-danger btn-sm cancel-pengiriman-btn">
+                                                    <i class="bi bi-x-circle me-2"></i>Batalkan
+                                                </button>
+                                            </form>
+                                        @endif
+                                        <a href="{{ route('pengiriman.detail', $item->id) }}" class="btn btn-red btn-sm">
+                                            <i class="bi bi-info-circle me-2"></i>Detail
+                                        </a>
+                                    </div>
+                                </td> --}}
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="text-center py-5">
+                <i class="bi bi-truck text-muted" style="font-size: 4rem;"></i>
+                <h5 class="mt-3 mb-2">List pengiriman Anda kosong</h5>
+                <p class="text-muted mb-4">Belum ada pengiriman yang dijadwalkan.</p>
+                <a href="{{ route('product') }}" class="btn btn-red">
+                    <i class="bi bi-motorcycle me-2"></i>Lihat Katalog Motor
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
 
     <!-- SweetAlert untuk konfirmasi pembatalan -->
     <script>

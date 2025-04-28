@@ -9,6 +9,7 @@ use App\Models\MetodePembayaran;
 use App\Models\Kredit;
 use App\Models\Motor;
 use App\Models\JenisCicilan;
+use App\Models\Pengirimans;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -21,15 +22,21 @@ class ClientKreditController extends Controller
      */
     public function index()
     {
-        // $pelanggan = Auth::guard('pelanggan')->user();
-        // $kredit = kredit::id();
         $pelangganId = Auth::guard('pelanggan')->id();
+        
+        // Ambil data pengajuan kredit dengan relasi
         $pengajuan = PengajuanKredit::with(['motor', 'jenisCicilan', 'asuransi', 'kredit'])
-        ->where('pelanggan_id', $pelangganId)
-        ->get(); 
-
-        return view('c-kredit.index', compact('pengajuan'), 
-        ['title' => 'Pengajuan Saya']);
+            ->where('pelanggan_id', $pelangganId)
+            ->get();
+        
+        // Ambil data pengiriman terkait
+        $pengiriman = Pengirimans::whereHas('kredit.PengajuanKredit', function ($query) use ($pelangganId) {
+            $query->where('pelanggan_id', $pelangganId);
+        })->with(['kredit.PengajuanKredit.motor'], ['kredit.PengajuanKredit.Pelanggan'])->get();
+    
+        return view('c-kredit.index', compact('pengajuan', 'pengiriman'), [
+            'title' => 'Pengajuan Saya'
+        ]);
     }
     /**
      * Show the form for creating a new resource.

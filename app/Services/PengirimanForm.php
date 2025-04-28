@@ -9,7 +9,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
-
+use Illuminate\Support\Str;
 
 final class PengirimanForm{
 
@@ -18,23 +18,38 @@ final class PengirimanForm{
             Fieldset::make()->schema([
                 TextInput::make('no_invoice')
                     ->label('Nomor Invoice')
+                    ->default(function () {
+                        $tanggal = now()->format('Ymd');
+                        $acak = strtoupper(Str::random(5));
+                        return "INV-$tanggal-$acak";
+                    })
+                    ->disabled()
+                    ->dehydrated()
                     ->required(),
                 Select::make('kredit_id')
                     ->label('Status Kredit')
-                    ->relationship('Kredit', 'status_kredit')
+                    ->options(function () {
+                        return \App\Models\Kredit::with('pengajuanKredit.pelanggan')
+                            ->get()
+                            ->mapWithKeys(function ($kredit) {
+                                $nama = $kredit->pengajuanKredit->pelanggan->nama_pelanggan ?? 'Tidak diketahui';
+                                return [$kredit->id => $nama . ' - ' . $kredit->status_kredit];
+                            });
+                    })
+                    ->searchable()
                     ->required(),
                 DatePicker::make('tgl_kirim')
                     ->label('Tanggal Pengiriman')
-                    ->native(false) // Gunakan date picker bawaan Filament, bukan browser
-                    ->displayFormat('d-m-Y') // Format tampilan di form
-                    ->format('Y-m-d') // Format penyimpanan di database
+                    ->native(false) 
+                    ->displayFormat('d-m-Y') 
+                    ->format('Y-m-d') 
                     ->required(),
                 DatePicker::make('tgl_tiba')
                     ->label('Tanggal Tiba')
-                    ->native(false) // Gunakan date picker bawaan Filament, bukan browser
-                    ->displayFormat('d-m-Y') // Format tampilan di form
-                    ->format('Y-m-d') // Format penyimpanan di database
-                    ->required(),
+                    ->native(false) 
+                    ->displayFormat('d-m-Y') 
+                    ->format('Y-m-d'),
+                    // ->required(),
                 Select::make('status_kirim')
                     ->label('Status Pengiriman')
                     ->options([

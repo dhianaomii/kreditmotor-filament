@@ -58,20 +58,28 @@ class ListPengiriman extends Component implements HasTable, HasForms
             ->columns([
                 TextColumn::make('no_invoice')
                     ->label('No Invoice'),
-                TextColumn::make('kredit_id')
-                    ->label('ID Kredit'),
+
+                TextColumn::make('Kredit.PengajuanKredit.Pelanggan.nama_pelanggan')
+                    ->label('Nama Pelanggan'),
+
                 TextColumn::make('tgl_kirim')
                     ->label('Tanggal Kirim'),   
+
                 TextColumn::make('tgl_tiba')
                     ->label('Tanggal Tiba'),
+
                 TextColumn::make('status_kirim')
                     ->label('Status Kirim'),
+
                 TextColumn::make('nama_kurir')
                     ->label('Nama Kurir'),
+
                 TextColumn::make('telpon_kurir')
                     ->label('Telpon Kurir'),
+
                 TextColumn::make('keterangan')
                     ->label('Keterangan'),
+                    
                 ImageColumn::make('bukti_foto')
                     ->label('Bukti Foto')
                     ->disk('public')
