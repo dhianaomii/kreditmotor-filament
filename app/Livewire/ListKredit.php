@@ -22,7 +22,8 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Enums\ActionsPosition;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
-
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Tables\Actions\Action;
 
 class ListKredit extends Component implements HasTable, HasForms
 {
@@ -32,9 +33,9 @@ class ListKredit extends Component implements HasTable, HasForms
     {
         return [
             'admin' => ['view', 'create', 'edit', 'delete'],
-            'ceo' => ['view'], // CEO can only view
-            'marketing' => ['view', 'create', 'edit'], // Marketing can't delete
-            'kurir' => [], // Kurir has no access
+            'ceo' => ['view'], 
+            'marketing' => ['view', 'create', 'edit'], 
+            'kurir' => [], 
             
         ];
     }
@@ -93,15 +94,25 @@ class ListKredit extends Component implements HasTable, HasForms
                     ->model(Kredit::class)
                     ->form(KreditForm::schema())
                     ->visible(fn () => $this->can('create')),
-                ExportAction::make('export_excel')
+                    ExportAction::make('export_excel')
                     ->label('Export to Excel')
                     ->exports([
                         ExcelExport::make()
                             ->fromTable()
                             ->withFilename('kredit_export_' . date('Y-m-d'))
-                            // ->except(['url_bukti_bayar']) // Kolom gambar tidak diekspor
                     ])
-                    ->visible(fn () => $this->can('view')) // Hanya pengguna dengan izin 'view' dapat ekspor
+                    ->visible(fn () => $this->can('view')),
+                Action::make('export_pdf')
+                    ->label('Export to PDF')
+                    ->action(function () {
+                        $kredits = Kredit::all(); 
+                        $pdf = Pdf::loadView('pdf.kredit', ['kredits' => $kredits]);
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            'kredit_export_' . date('Y-m-d') . '.pdf'
+                        );
+                    })
+                    ->visible(fn () => $this->can('view'))
             ])
             ->bulkActions([
                 //
