@@ -6,6 +6,7 @@
 
 @section('content')
 
+
 <div class="container-fluid bg-breadcrumb">
     <div class="container text-center py-5" style="max-width: 900px;">
         <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Pengajuan Kredit Motor</h4>  
@@ -89,10 +90,11 @@
                                             <td>
                                                 <div class="d-flex gap-2 text-center">
                                                     @if($item->status_pengajuan == 'Menunggu Konfirmasi' || $item->status_pengajuan == 'Diproses')
-                                                        <form action="{{ route('pengajuan.cancel', $item->id) }}" method="POST" class="cancel-form">
+                                                        <form action="{{ route('pengajuan.cancel', $item->id) }}" method="POST" class="cancel-form" id="cancel-form-{{ $item->id }}">
                                                             @csrf
                                                             @method('PATCH')
-                                                            <button type="submit" class="btn btn-outline-danger btn-sm cancel-btn">
+                                                            <input type="hidden" name="keterangan_status_pengajuan" id="keterangan_status_pengajuan-{{ $item->id }}">
+                                                            <button type="button" class="btn btn-outline-danger btn-sm cancel-btn" data-id="{{ $item->id }}">
                                                                 <i class="bi bi-x-circle me-2"></i>Batalkan
                                                             </button>
                                                         </form>
@@ -105,53 +107,6 @@
                                                         <a href="{{ route('cicilan', $item->id) }}" class="btn btn-red btn-sm">
                                                             <i class="bi bi-info-circle me-2"></i>Lihat Detail
                                                         </a>
-                                                        {{-- @if(!$item->kredit || !$item->kredit->pengiriman)
-                                                            @php
-                                                                $pelanggan = Auth::guard('pelanggan')->user();
-                                                                $hasAlamat = $pelanggan->hasAlamat();
-                                                            @endphp
-                                                            @if($hasAlamat)
-                                                                <!-- Modal untuk memilih tanggal jika sudah ada alamat -->
-                                                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#jadwalModal{{ $item->id }}">
-                                                                    <i class="bi bi-truck me-2"></i>Jadwalkan Pengiriman
-                                                                </button>
-                                                                <!-- Modal -->
-                                                                <div class="modal fade" id="jadwalModal{{ $item->id }}" tabindex="-1" aria-labelledby="jadwalModalLabel" aria-hidden="true">
-                                                                    <div class="modal-dialog">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title" id="jadwalModalLabel">Pilih Tanggal Pengiriman</h5>
-                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                            </div>
-                                                                            <form action="{{ route('kirim.store', $item->id) }}" method="POST">
-                                                                                @csrf
-                                                                                <div class="modal-body">
-                                                                                    <div class="mb-3">
-                                                                                        <label for="tanggal_pengiriman" class="form-label">Tanggal Pengiriman</label>
-                                                                                        <input type="date" class="form-control" id="tanggal_pengiriman" name="tanggal_pengiriman" 
-                                                                                            value="{{ \Carbon\Carbon::today()->addDays(1)->format('Y-m-d') }}" 
-                                                                                            min="{{ \Carbon\Carbon::today()->addDays(1)->format('Y-m-d') }}" required>
-                                                                                    </div>
-                                                                                    <div class="mb-3">
-                                                                                        <label class="form-label">Alamat Pengiriman</label>
-                                                                                        <textarea class="form-control" readonly>{{ $pelanggan->alamat_utama }}</textarea>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="modal-footer">
-                                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                                                    <button type="submit" class="btn btn-primary">Jadwalkan</button>
-                                                                                </div>
-                                                                            </form>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            @else
-                                                                <!-- Jika tidak ada alamat, ke form create -->
-                                                                <a href="{{ route('kirim.create', $item->id) }}" class="btn btn-outline-primary btn-sm">
-                                                                    <i class="bi bi-truck me-2"></i>Jadwalkan Pengiriman
-                                                                </a>
-                                                            @endif
-                                                        @endif --}}
                                                     @endif
                                                 </div>
                                             </td>
@@ -175,135 +130,157 @@
         </div>
     </div>
     <!-- Tambahkan tabel pengiriman di bawah card pengajuan -->
-<div class="card mb-4 mt-4">
-    <div class="product-title-bar">
-        <h4 class="mb-0 text-white">
-            <i class="bi bi-truck me-2"></i>
-            List Pengiriman
-        </h4>
-        <div>
-            <i class="bi bi-box-seam text-danger fs-4"></i>
+    <div class="card mb-4 mt-4">
+        <div class="product-title-bar">
+            <h4 class="mb-0 text-white">
+                <i class="bi bi-truck me-2"></i>
+                List Pengiriman
+            </h4>
+            <div>
+                <i class="bi bi-box-seam text-danger fs-4"></i>
+            </div>
         </div>
-    </div>
-    <div class="card-body">
-        @if($pengiriman->isNotEmpty())
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th style="width: 15%;">No. Invoice</th>
-                            <th style="width: 20%;">Motor</th>
-                            <th style="width: 15%;">Tanggal Pengiriman</th>
-                            <th style="width: 25%;">Alamat Pengiriman</th>
-                            <th style="width: 15%;">Status Pengiriman</th>
-                            <th style="width: 10%;">Bukti Pengiriman</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($pengiriman as $item)
+        <div class="card-body">
+            @if($pengiriman->isNotEmpty())
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
                             <tr>
-                                <td>{{ $item->no_invoice ?? '-' }}</td>
-                                <td class="fw-bold">
-                                    {{ $item->kredit->PengajuanKredit->motor->nama_motor ?? '-' }}
-                                </td>
-                                <td>
-                                    {{ $item->tgl_kirim ? \Carbon\Carbon::parse($item->tgl_kirim)->format('d M Y') : '-' }}
-                                </td>
-                                <td>{{Auth::user()->alamat1}}, {{Auth::user()->kota1}}, {{Auth::user()->provinsi1}}, {{Auth::user()->kode_pos1}}</td>
-                                <td>
-                                    <span class="badge bg-{{ $item->status_kirim == 'Tiba Ditujuan' ? 'success' : ($item->status_kirim == 'Sedang Dikirim' ? 'primary' : 'primary') }} p-2">
-                                        {{ $item->status_kirim ?? '-' }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @if($item->bukti_foto)
-                                        <!-- Tombol untuk memicu modal -->
-                                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#buktiModal{{ $item->id }}">
-                                            <i class="bi bi-file-earmark-image me-2"></i> Lihat Bukti
-                                        </button>
-                                
-                                        <!-- Modal untuk menampilkan bukti pengiriman -->
-                                        <div class="modal fade" id="buktiModal{{ $item->id }}" tabindex="-1" aria-labelledby="buktiModalLabel{{ $item->id }}" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="buktiModalLabel{{ $item->id }}">Bukti Pengiriman - {{ $item->no_invoice ?? '-' }}</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body text-center">
-                                                        <img src="{{ asset('storage/' . $item->bukti_foto) }}" alt="Bukti Pengiriman" class="img-fluid" style="max-height: 500px; object-fit: contain;">
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <th style="width: 15%;">No. Invoice</th>
+                                <th style="width: 20%;">Motor</th>
+                                <th style="width: 15%;">Tanggal Pengiriman</th>
+                                <th style="width: 25%;">Alamat Pengiriman</th>
+                                <th style="width: 15%;">Status Pengiriman</th>
+                                <th style="width: 10%;">Bukti Pengiriman</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pengiriman as $item)
+                                <tr>
+                                    <td>{{ $item->no_invoice ?? '-' }}</td>
+                                    <td class="fw-bold">
+                                        {{ $item->kredit->PengajuanKredit->motor->nama_motor ?? '-' }}
+                                    </td>
+                                    <td>
+                                        {{ $item->tgl_kirim ? \Carbon\Carbon::parse($item->tgl_kirim)->format('d M Y') : '-' }}
+                                    </td>
+                                    <td>{{Auth::user()->alamat1}}, {{Auth::user()->kota1}}, {{Auth::user()->provinsi1}}, {{Auth::user()->kode_pos1}}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $item->status_kirim == 'Tiba Ditujuan' ? 'success' : ($item->status_kirim == 'Sedang Dikirim' ? 'primary' : 'primary') }} p-2">
+                                            {{ $item->status_kirim ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($item->bukti_foto)
+                                            <!-- Tombol untuk memicu modal -->
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#buktiModal{{ $item->id }}">
+                                                <i class="bi bi-file-earmark-image me-2"></i> Lihat Bukti
+                                            </button>
+                                    
+                                            <!-- Modal untuk menampilkan bukti pengiriman -->
+                                            <div class="modal fade" id="buktiModal{{ $item->id }}" tabindex="-1" aria-labelledby="buktiModalLabel{{ $item->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="buktiModalLabel{{ $item->id }}">Bukti Pengiriman - {{ $item->no_invoice ?? '-' }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body text-center">
+                                                            <img src="{{ asset('storage/' . $item->bukti_foto) }}" alt="Bukti Pengiriman" class="img-fluid" style="max-height: 500px; object-fit: contain;">
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @else
-                                        <span class="text-muted">Belum Ada Bukti Pengiriman</span>
-                                    @endif
-                                </td>
-
-                                {{-- <td>
-                                    <div class="d-flex gap-2 text-center">
-                                        @if($item->status_pengiriman == 'Dalam Proses')
-                                            <form action="{{ route('pengiriman.cancel', $item->id) }}" method="POST" class="cancel-pengiriman-form">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-outline-danger btn-sm cancel-pengiriman-btn">
-                                                    <i class="bi bi-x-circle me-2"></i>Batalkan
-                                                </button>
-                                            </form>
+                                        @else
+                                            <span class="text-muted">Belum Ada Bukti Pengiriman</span>
                                         @endif
-                                        <a href="{{ route('pengiriman.detail', $item->id) }}" class="btn btn-red btn-sm">
-                                            <i class="bi bi-info-circle me-2"></i>Detail
-                                        </a>
-                                    </div>
-                                </td> --}}
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="text-center py-5">
-                <i class="bi bi-truck text-muted" style="font-size: 4rem;"></i>
-                <h5 class="mt-3 mb-2">List pengiriman Anda kosong</h5>
-                <p class="text-muted mb-4">Belum ada pengiriman yang dijadwalkan.</p>
-                <a href="{{ route('product') }}" class="btn btn-red">
-                    <i class="bi bi-motorcycle me-2"></i>Lihat Katalog Motor
-                </a>
-            </div>
-        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class="bi bi-truck text-muted" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3 mb-2">List pengiriman Anda kosong</h5>
+                    <p class="text-muted mb-4">Belum ada pengiriman yang dijadwalkan.</p>
+                    <a href="{{ route('product') }}" class="btn btn-red">
+                        <i class="bi bi-motorcycle me-2"></i>Lihat Katalog Motor
+                    </a>
+                </div>
+            @endif
+        </div>
     </div>
-</div>
 
-    <!-- SweetAlert untuk konfirmasi pembatalan -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.cancel-btn').forEach(button => {
-                button.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    const form = this.closest('.cancel-form');
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Konfirmasi Pembatalan',
-                        text: 'Apakah Anda yakin ingin membatalkan pengajuan ini?',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, Batalkan',
-                        cancelButtonText: 'Tidak',
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
+  <!-- SweetAlert untuk konfirmasi pembatalan dengan input alasan -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const pengajuanId = this.getAttribute('data-id');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Konfirmasi Pembatalan',
+                    text: 'Masukkan alasan pembatalan pengajuan ini:',
+                    input: 'textarea',
+                    inputPlaceholder: 'Tuliskan alasan pembatalan...',
+                    inputAttributes: {
+                        'required': true,
+                        'minlength': 10
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Batalkan',
+                    cancelButtonText: 'Tidak',
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    preConfirm: (keterangan) => {
+                        if (!keterangan || keterangan.length < 10) {
+                            Swal.showValidationMessage('Alasan harus diisi minimal 10 karakter.');
+                            return false;
                         }
-                    });
+                        return keterangan;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById(`cancel-form-${pengajuanId}`);
+                        const keteranganInput = document.getElementById(`keterangan_status_pengajuan-${pengajuanId}`);
+                        keteranganInput.value = result.value;
+                        form.submit();
+                    }
                 });
             });
         });
-    </script>
+    });
+</script>
 
+    <!-- Custom JavaScript -->
+    <script>
+        // Efek transisi fade-out untuk semua link dengan kelas 'read-more' dan tombol checkout
+        document.querySelectorAll('.read-more, .btn-red, .btn-outline-red').forEach(link => {
+            link.addEventListener('click', function(event) {
+                if (this.tagName === 'A' && !this.closest('form')) {
+                    event.preventDefault();
+                    const href = this.getAttribute('href');
+                    document.body.classList.add('fade-out');
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 500);
+                }
+            });
+        });
+
+        // Script untuk menghilangkan spinner setelah halaman selesai dimuat
+        window.addEventListener('load', function () {
+            const spinner = document.getElementById('spinner');
+            if (spinner) {
+                spinner.classList.remove('show');
+            }
+        });
+    </script>
     <!-- Custom JavaScript -->
     <script>
         // Efek transisi fade-out untuk semua link dengan kelas 'read-more' dan tombol checkout

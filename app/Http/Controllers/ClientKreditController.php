@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Events\KreditDibatalkan;
 
 class ClientKreditController extends Controller
 {
@@ -168,8 +169,12 @@ class ClientKreditController extends Controller
                 if (!in_array($pengajuan->status_pengajuan, ['Menunggu Konfirmasi', 'Diproses'])) {
                     return redirect()->route('pengajuan')->with('error', 'Pengajuan tidak dapat dibatalkan karena statusnya sudah ' . $pengajuan->status_pengajuan . '.');
                 }
+                // Validasi alasan pembatalan
+                $request->validate([
+                    'keterangan_status_pengajuan' => 'required|min:10',
+                ]);
                 $newStatus = 'Dibatalkan Pembeli';
-                $successMessage = 'Pengajuan berhasil dibatalkan.';
+                $successMessage = 'Pengajuan berhasil dibatalkan dengan alasan: ' . $request->keterangan_status_pengajuan;
             } elseif ($action === 'reject') {
                 if (!Auth::guard('admin')->check()) {
                     return redirect()->route('pengajuan')->with('error', 'Anda tidak memiliki akses untuk menolak pengajuan ini.');
@@ -177,13 +182,14 @@ class ClientKreditController extends Controller
                 if (!in_array($pengajuan->status_pengajuan, ['Menunggu Konfirmasi', 'Diproses'])) {
                     return redirect()->route('pengajuan')->with('error', 'Pengajuan tidak dapat ditolak karena statusnya sudah ' . $pengajuan->status_pengajuan . '.');
                 }
+                $keterangan = $request->input('keterangan_status_pengajuan', 'Ditolak oleh admin');
                 $newStatus = 'Ditolak';
                 $successMessage = 'Pengajuan berhasil ditolak dan stok telah dikembalikan.';
             } else {
                 return redirect()->route('pengajuan')->with('error', 'Aksi tidak valid.');
             }
 
-            DB::transaction(function () use ($pengajuan, $motor, $newStatus) {
+            DB::transaction(function () use ($pengajuan, $motor, $newStatus, $request, $action) {
                 // Kembalikan stok hanya jika belum dikembalikan
                 if (!$pengajuan->is_stock_returned && in_array($newStatus, ['Dibatalkan Pembeli', 'Ditolak'])) {
                     $motor->stok += 1;
@@ -191,10 +197,17 @@ class ClientKreditController extends Controller
                     $pengajuan->is_stock_returned = true;
                 }
 
-                // Update status pengajuan
+                // Update status pengajuan dan keterangan
                 $pengajuan->status_pengajuan = $newStatus;
-                $pengajuan->keterangan_status_pengajuan = $newStatus;
+                $pengajuan->keterangan_status_pengajuan = $action === 'cancel' ? 
+                    $request->keterangan_status_pengajuan : 
+                    ($request->input('keterangan_status_pengajuan', $newStatus));
                 $pengajuan->save();
+
+                // Picu event untuk pembatalan
+                if ($action === 'cancel') {
+                    event(new KreditDibatalkan($pengajuan));
+                }
             });
 
             return redirect()->route('pengajuan')->with('success', $successMessage);

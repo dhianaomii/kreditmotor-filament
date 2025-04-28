@@ -9,7 +9,10 @@ class NotifikasiKredit extends Component
 {
     public $jumlahNotifikasi = 0;
 
-    protected $listeners = ['kreditDiajukan' => 'updateNotifikasi'];
+    protected $listeners = [
+        'kreditDiajukan' => 'updateNotifikasi',
+        'kreditDibatalkan' => 'updateNotifikasi'
+    ];
 
     public function mount()
     {
@@ -18,7 +21,12 @@ class NotifikasiKredit extends Component
 
     public function updateNotifikasi()
     {
-        $this->jumlahNotifikasi = PengajuanKredit::where('status_pengajuan', 'Menunggu Konfirmasi')->count();
+        $this->jumlahNotifikasi = PengajuanKredit::where('status_pengajuan', 'Menunggu Konfirmasi')
+        ->orWhere(function ($query) {
+            $query->where('status_pengajuan', 'Dibatalkan Pembeli')
+                  ->where('updated_at', '>=', now()->subHours(12));
+        })
+        ->count();
     }
 
     public function render()
