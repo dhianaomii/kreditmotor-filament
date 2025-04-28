@@ -2,26 +2,36 @@
 
 namespace App\Services;
 
-use FIlament\Forms;
+use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Toggle; // Tambahkan ini
 
-final class PelangganForm{
-    public static function schema(): array {
+final class PelangganForm
+{
+    public static function schema(): array
+    {
         return [
             Fieldset::make()->schema([
                 TextInput::make('nama_pelanggan')
                     ->label('Nama Pelanggan')
                     ->required(),
+                    Toggle::make('is_blocked') // Tambahkan field ini
+                    ->label('Blokir Pelanggan')
+                    ->default(false)
+                    ->helperText('Aktifkan untuk memblokir pelanggan agar tidak bisa login.'),
                 TextInput::make('email')
-                    ->label('Email'),
+                    ->label('Email')
+                    ->email()
+                    ->unique(table: 'pelanggans', ignoreRecord: true),
                 TextInput::make('password')
                     ->label('Password')
                     ->password()
-                    ->required(),
+                    // ->required()
+                    ->hiddenOn('edit'), // Sembunyikan password saat edit
                 TextInput::make('no_hp')
                     ->label('Nomor HP')
                     ->required()
@@ -34,7 +44,7 @@ final class PelangganForm{
                         ->directory('photos')
                         ->visibility('public'),
                 ]),
-                Fieldset::make(' Alamat 1')->schema([
+                Fieldset::make('Alamat 1')->schema([
                     TextInput::make('alamat1')
                         ->label('Alamat'),
                     TextInput::make('kota1')
@@ -44,7 +54,7 @@ final class PelangganForm{
                     TextInput::make('kode_pos1')
                         ->label('Kode Pos'),
                 ]),
-                Fieldset::make(' Alamat 2 (Opsional)')->schema([
+                Fieldset::make('Alamat 2 (Opsional)')->schema([
                     TextInput::make('alamat2')
                         ->label('Alamat'),
                     TextInput::make('kota2')
@@ -54,7 +64,7 @@ final class PelangganForm{
                     TextInput::make('kode_pos2')
                         ->label('Kode Pos'),
                 ]),
-                Fieldset::make(' Alamat 3 (Opsional)')->schema([
+                Fieldset::make('Alamat 3 (Opsional)')->schema([
                     TextInput::make('alamat3')
                         ->label('Alamat'),
                     TextInput::make('kota3')

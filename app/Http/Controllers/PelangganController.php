@@ -76,14 +76,19 @@ class PelangganController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
+    
+        $pelanggan = Pelanggan::where('email', $request->email)->first();
         
+        if ($pelanggan && $pelanggan->is_blocked) {
+            return back()->with(['error' => 'Akun Anda telah diblokir. Silakan hubungi admin.'])->withInput();
+        }
+    
         if (Auth::guard('pelanggan')->attempt($request->only('email', 'password'))) {
             return redirect()->route('/')->with('success', 'Login berhasil!');
         }
-        
-        return back()->with(['error' => 'Email or Password doesnt match.'])->withInput();
+    
+        return back()->with(['error' => 'Email atau Password salah.'])->withInput();
     }
-
     public function logout()
     {
         Auth::guard('pelanggan')->logout();
@@ -95,6 +100,41 @@ class PelangganController extends Controller
     {
         // Kirim data ke view
         return view('c-profile.index');
+    }
+
+    /**
+     * Blokir pelanggan
+     */
+    public function block(string $id)
+    {
+        try {
+            $pelanggan = Pelanggan::findOrFail($id);
+            $pelanggan->update(['is_blocked' => true]);
+
+            // Logout pelanggan jika sedang login
+            if (Auth::guard('pelanggan')->check() && Auth::guard('pelanggan')->id() == $id) {
+                Auth::guard('pelanggan')->logout();
+            }
+
+            return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil diblokir!');
+        } catch (\Exception $e) {
+            return redirect()->route('pelanggan.index')->with('error', 'Gagal memblokir pelanggan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Buka blokir pelanggan
+     */
+    public function unblock(string $id)
+    {
+        try {
+            $pelanggan = Pelanggan::findOrFail($id);
+            $pelanggan->update(['is_blocked' => false]);
+
+            return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil dibuka blokirnya!');
+        } catch (\Exception $e) {
+            return redirect()->route('pelanggan.index')->with('error', 'Gagal membuka blokir pelanggan: ' . $e->getMessage());
+        }
     }
 
     /**

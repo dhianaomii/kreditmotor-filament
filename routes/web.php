@@ -32,6 +32,8 @@ Route::post('/register', [PelangganController::class, 'register'])->name('regist
 Route::get('/login', [PelangganController::class, 'ShowLoginForm'])->name('login'); // menampilkan login form
 Route::post('/login', [PelangganController::class, 'login'])->name('login'); // mengirim data login
 Route::post('/log-out', [PelangganController::class, 'logout'])->name('log-out'); // eksekusi logout
+Route::post('/{id}/block', [PelangganController::class, 'block'])->name('pelanggan.block');
+Route::post('/{id}/unblock', [PelangganController::class, 'unblock'])->name('pelanggan.unblock');
 
 Route::get('/profile', [PelangganController::class, 'getprofile'])->name('profile')->middleware([ 'auth:pelanggan']); // menampilkan index profile sesuai dengan user yang login
 Route::get('/profile/edit', [PelangganController::class, 'edit'])->name('profile.edit')->middleware([ 'auth:pelanggan']); // menampilkan form edit profile

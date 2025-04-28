@@ -9,6 +9,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BooleanColumn;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Table;
@@ -55,6 +56,10 @@ class ListPelanggan extends Component implements HasTable, HasForms
         return $table
             ->query(Pelanggan::query())
             ->columns([
+                BooleanColumn::make('is_blocked')
+                    ->label('Status Blokir')
+                    ->trueIcon('heroicon-o-x-circle')
+                    ->falseIcon('heroicon-o-check-circle'),
                 TextColumn::make('nama_pelanggan')
                     ->label('Nama Pelanggan'),
                 TextColumn::make('email')
