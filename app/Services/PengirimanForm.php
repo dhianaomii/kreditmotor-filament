@@ -10,6 +10,10 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Str;
+use Filament\Forms\Components\ToggleButtons;
+// use App\Forms\Components\TakePicture;
+use Filament\Forms\Get;
+use emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture;
 
 final class PengirimanForm{
 
@@ -65,14 +69,59 @@ final class PengirimanForm{
                 TextInput::make('keterangan')
                     ->label('Keterangan')
                     ->required(),
-                Grid::make(1)->schema([        
-                    FileUpload::make('bukti_foto')
-                        ->label('Bukti Foto')
-                        ->image()
-                        ->disk('public')
-                        ->directory('photos')
-                        ->visibility('public'),
-                ])
+                    
+                // Ini take picture pake plugin
+                TakePicture::make('bukti_foto')
+                    ->label('Camera Test')
+                    ->disk('public')
+                    ->directory('kurir')
+                    ->visibility('public')
+                    ->useModal(true)
+                    ->showCameraSelector(true)
+                    ->aspect('16:9')
+                    ->imageQuality(80)
+                    ->shouldDeleteOnEdit(false)
+
+
+                // Kalo ini pake take picture component
+                // Grid::make(1)->schema([        
+                //     ToggleButtons::make('image_mode')
+                //         ->translateLabel()
+                //         ->label('Change image')
+                //         ->options([
+                //             'UPLOAD' => __('Upload a image'),
+                //             'TAKE' => __('Take a picture'),
+                //         ])
+                //         ->default('UPLOAD')
+                //         ->afterStateHydrated(function (ToggleButtons $component) {
+                //             $component->state('UPLOAD');
+                //         })
+                //         ->live()
+                //         ->columnSpanFull()
+                //         ->grouped(),
+                //     FileUpload::make('bukti_foto')
+                //         ->disk('kurir')
+                //         ->translateLabel()
+                //         ->avatar()
+                //         ->label('Photo')
+                //         ->image()
+                //         ->imageEditor()
+                //         ->imageEditorAspectRatios(['1:1'])
+                //         ->reorderable()
+                //         ->visible(function (Get $get) {
+                //             return $get('image_mode') === 'UPLOAD';
+                //         })
+                //         ->columnSpanFull(),
+                //     TakePicture::make('take_photo')
+                //         ->translateLabel()
+                //         ->label('Take a picture')
+                //         ->visible(function (Get $get) {
+                //             return $get('image_mode') === 'TAKE';
+                //         })
+                //         ->columnSpanFull()
+              
+
+                // ])
             ])
         ];
     }

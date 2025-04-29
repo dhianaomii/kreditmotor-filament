@@ -8,7 +8,11 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ClientAngsuranController;
 use App\Http\Controllers\ClientPengirimanController;
+use App\Http\Controllers\WebcamController;
 use Illuminate\Support\Facades\Route;
+
+use App\Livewire\CameraCapture;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -91,3 +95,9 @@ Route::middleware(['auth', 'role:admin,ceo,marketing'])->group(function () {
 Route::middleware(['auth', 'role:admin,ceo,kurir'])->group(function () {
     Route::get('pengiriman', [MainController::class, 'getpengiriman'])->name('pengiriman');
 });
+
+
+
+
+
+Route::get('/camera-capture', [WebcamController::class, 'index']);
