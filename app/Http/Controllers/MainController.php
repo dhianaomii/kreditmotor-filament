@@ -14,6 +14,7 @@ use App\Models\Pelanggan;
 use App\Models\PengajuanKredit;
 use App\Models\Pengirimans;
 use App\Models\User;
+use App\Models\Blog;
 
 class MainController extends Controller
 {
@@ -33,6 +34,18 @@ class MainController extends Controller
     }
 
     public function getblog()
+    {
+        $blog = Blog::where('status', 'published')->get();
+        // $relatedblog = Blog::where('id', '!=', $id)->limit(4)->get();
+
+        return view('c-blog.index' ,
+        [
+            'title' => 'Blog',
+            'blog' => $blog
+        ]);
+    }
+
+    public function getblogadmin()
     {
         return view('blog.index',
         [

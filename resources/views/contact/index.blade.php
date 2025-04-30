@@ -30,16 +30,16 @@
                     </p>
                     <div class="row g-4">
                         <div class="col-lg-6">
-                            <div class="bg-white d-flex">
+                            <div class="bg-white d-flex p-3">
                                 <i class="fas fa-map-marker-alt fa-2x text-primary me-2"></i>
                                 <div>
                                     <h4>Address</h4>
-                                    <p class="mb-0">Mandala Golden Residence</p>
+                                    <p class="mb-0">SMKN 1 Cibinong</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <div class="bg-white d-flex">
+                            <div class="bg-white d-flex p-3">
                                 <i class="fas fa-envelope fa-2x text-primary me-2"></i>
                                 <div>
                                     <h4>Mail Us</h4>
@@ -48,7 +48,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <div class="bg-white d-flex">
+                            <div class="bg-white d-flex p-3">
                                 <i class="fa fa-phone-alt fa-2x text-primary me-2"></i>
                                 <div>
                                     <h4>Telephone</h4>
@@ -57,7 +57,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6">
-                            <div class="bg-white d-flex">
+                            <div class="bg-white d-flex p-3">
                                 <i class="fab fa-firefox-browser fa-2x text-primary me-2"></i>
                                 <div>
                                     <h4>Yoursite@ex.com</h4>
@@ -144,7 +144,7 @@
             </div>
             <div class="col-12 wow fadeInUp" data-wow-delay="0.2s">
                 <div class="h-100 overflow-hidden">
-                    <iframe class="w-100" style="height: 400px;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d387191.33750346623!2d-73.97968099999999!3d40.6974881!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sbd!4v1694259649153!5m2!1sen!2sbd" 
+                    <iframe class="w-100" style="height: 400px;" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.997759836978!2d106.80546671057158!3d-6.521963993443334!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c3db9bbedcc3%3A0x1f5280e86053b1e9!2sSMK%20NEGERI%201%20Cibinong!5e0!3m2!1sid!2sid!4v1746002652917!5m2!1sid!2sid" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" 
                     loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>

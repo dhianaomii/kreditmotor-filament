@@ -118,5 +118,15 @@
       </a>
     </li>
     @endif
+
+     <!-- Blog: Admin, CEO, Marketing -->
+     @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'ceo', 'marketing']))
+     <li class="nav-item">
+       <a class="nav-link" href="{{ url('blog-admin') }}">
+         <i class="mdi mdi-calendar-multiple menu-icon"></i>
+         <span class="menu-title">Blog</span>
+       </a>
+     </li>
+     @endif
   </ul>
 </nav>

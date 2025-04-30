@@ -31,7 +31,7 @@ class ProductController extends Controller
         $jenisMotors = JenisMotor::all();
 
         return view('product.index', compact('data', 'jenisMotors')
-        ,['title' => 'Daftar Motor']);
+        ,['title' => 'Product']);
     }
 
     public function create($id)

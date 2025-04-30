@@ -43,7 +43,7 @@
                                 <i class="fas fa-map-marker-alt text-primary me-2"></i>
                                 <div>
                                     <h5 class="text-white mb-2">Address</h5>
-                                    <p class="mb-0">Mandala Golden Residence</p>
+                                    <p class="mb-0">SMKN 1 Cibinong</p>
                                 </div>
                             </div>
                         </div>

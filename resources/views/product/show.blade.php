@@ -96,31 +96,27 @@
                                             data-bs-toggle="tooltip" 
                                             title="{{ $motor->stok == 0 ? 'Produk tidak tersedia' : 'Tambahkan ke keranjang' }}">
                                         <i class="bi bi-cart-plus fs-5 me-2"></i>
-                                        <span class="fw-medium">{{ $motor->stok == 0 ? 'Out of Stock' : 'Add to Cart' }}</span>
+                                        <span class="fw-medium">{{ $motor->stok == 0 ? 'Out of Stock' : 'Tambahkan ke Keranjang' }}</span>
                                     </button>
                                 </div>
                                 <div class="col-md-6">
                                     @if($motor->stok > 0)
-                                        <a href="{{ route('product.create', $motor->id) }}" class="btn btn-danger text-uppercase fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm">
-                                            <i class="bi bi-calendar-check fs-5 me-2"></i>
-                                            <span class="fw-medium">Book Now</span>
-                                        </a>
+                                        @auth
+                                            <a href="{{ route('product.create', $motor->id) }}" class="btn btn-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm">
+                                                <i class="bi bi-calendar-check fs-5 me-2"></i>
+                                                <span class="fw-medium">Ajukan Sekarang</span>
+                                            </a>
+                                        @else
+                                            <button type="button" class="btn btn-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" onclick="showLoginAlert()">
+                                                <i class="bi bi-calendar-check fs-5 me-2"></i>
+                                                <span class="fw-medium">Ajukan Sekarang</span>
+                                            </button>
+                                        @endauth
                                     @else
-                                        <button type="button" class="btn btn-danger text-uppercase fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" 
-                                                onclick="showStockAlert()">
+                                        <button type="button" class="btn btn-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" onclick="showStockAlert()">
                                             <i class="bi bi-calendar-check fs-5 me-2"></i>
-                                            <span class="fw-medium">Book Now</span>
+                                            <span class="fw-medium">Ajukan Sekarang</span>
                                         </button>
-                                        <script>
-                                            function showStockAlert() {
-                                                Swal.fire({
-                                                    icon: 'error',
-                                                    title: 'Stok Tidak Tersedia',
-                                                    text: 'Maaf, produk ini sedang tidak tersedia.',
-                                                    confirmButtonColor: '#e01e3c'
-                                                });
-                                            }
-                                        </script>
                                     @endif
                                 </div>
                             </div>
@@ -234,6 +230,25 @@
             });
         </script>
     @endif
+
+    <script>
+        function showLoginAlert() {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Anda Belum Login',
+                text: 'Anda harus login terlebih dahulu untuk mengajukan kredit.',
+                showCancelButton: true,
+                confirmButtonText: 'Login Sekarang',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route('login') }}'; // Redirect to login page
+                }
+            });
+        }
+    </script>
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

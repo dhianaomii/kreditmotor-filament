@@ -129,7 +129,9 @@
             <div class="row g-5">
                 <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="team-item bg-white text-center rounded overflow-hidden pt-4">
-                        <img class="img-fluid w-50 rounded-circle" style="height: 200px; object-fit: cover;" src="{{ asset('fe/img/orang1.jpg') }}" alt="Team Member">
+                        <div class="team-img-container">
+                            <img class="img-fluid team-img" src="{{ asset('fe/img/orang1.jpg') }}" alt="Team Member">
+                        </div>
                         <div class="team-content">
                             <h5 class="mb-0">John Anderson</h5>
                             <p class="text-primary">Chief Executive Officer</p>
@@ -143,7 +145,9 @@
                 </div>
                 <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
                     <div class="team-item bg-white text-center rounded overflow-hidden pt-4">
-                        <img class="img-fluid w-50 rounded-circle" style="height: 200px; object-fit: cover;" src="{{ asset('fe/img/orang2.jpg') }}" alt="Team Member">
+                        <div class="team-img-container">
+                            <img class="img-fluid team-img" src="{{ asset('fe/img/orang2.jpg') }}" alt="Team Member">
+                        </div>
                         <div class="team-content">
                             <h5 class="mb-0">Sarah Johnson</h5>
                             <p class="text-primary">Operations Director</p>
@@ -157,7 +161,9 @@
                 </div>
                 <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
                     <div class="team-item bg-white text-center rounded overflow-hidden pt-4">
-                        <img class="img-fluid w-50 rounded-circle" style="height: 200px; object-fit: cover;" src="{{ asset('fe/img/orang3.jpg') }}" alt="Team Member">
+                        <div class="team-img-container">
+                            <img class="img-fluid team-img" src="{{ asset('fe/img/orang3.jpg') }}" alt="Team Member">
+                        </div>
                         <div class="team-content">
                             <h5 class="mb-0">Michael Rodriguez</h5>
                             <p class="text-primary">Finance Manager</p>
@@ -173,6 +179,22 @@
         </div>
     </div>
     <!-- Team End -->
+
+    <!-- Tambahkan CSS di dalam Blade atau di file terpisah -->
+    <style>
+        .team-img-container {
+            width: 100%;
+            height: 300px; /* Tinggi container seragam */
+            overflow: hidden;
+        }
+
+        .team-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Gambar akan memenuhi container tanpa distorsi */
+            object-position: center; /* Posisi gambar di tengah */
+        }
+    </style>
 
     <!-- Call To Action Start -->
     <div class="container-fluid call-to-action bg-primary bg-call-to-action py-5">

@@ -90,6 +90,7 @@ Route::middleware(['auth', 'role:admin,ceo,marketing'])->group(function () {
     Route::get('pengajuan-kredit', [MainController::class, 'getpengajuankredit'])->name('pengajuan-kredit');
     Route::get('kredit', [MainController::class, 'getkredit'])->name('kredit');
     Route::get('angsuran', [MainController::class, 'getangsuran'])->name('angsuran');
+    Route::get('blog-admin', [MainController::class, 'getblogadmin'])->name('blog-admin');
 });
 
 Route::middleware(['auth', 'role:admin,ceo,kurir'])->group(function () {

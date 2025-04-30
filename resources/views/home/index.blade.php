@@ -79,7 +79,6 @@
                 </p>
             </div>
             
-            
             <div class="row g-4">
                 @foreach ($data as $i)
                 <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.2s">
@@ -89,7 +88,15 @@
                         </div>
                         <div class="feature-content p-4">
                             <h4 class="mb-3">{{ $i->nama_motor}}</h4>
-                            <p class="mb-4">{{ $i->deskripsi_motor}}</p>
+                            <p class="mb-2">{{ $i->deskripsi_motor}}</p>
+                            @if($i->stok > 10)
+                                <span class="mb-2 badge bg-success">{{ $i->stok }} Available</span>
+                            @elseif($i->stok > 0)
+                                <span class="mb-2 badge bg-warning text-dark">{{ $i->stok }} Limited Stock</span>
+                            @else
+                                <span class="mb-2 badge bg-danger">Out of Stock</span>
+                            @endif
+                            <h5 class="mb-3">Rp {{ number_format($i->harga_jual)}}</h5>
                             <a href="{{route('product.show', $i->id)}}" class="btn btn-primary py-2 px-4"> <span>View Motors</span></a>
                         </div>
                     </div>

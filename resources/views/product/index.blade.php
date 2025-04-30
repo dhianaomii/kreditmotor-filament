@@ -113,7 +113,7 @@
                             </p>
                             <div class="mt-auto">
                                 @if ($product->stok > 0)
-                                    <a href="{{ route('product.create', $product->id) }}" class="btn btn-dark py-2 w-100">
+                                    <a href="{{ route('product.show', $product->id) }}" class="btn btn-dark py-2 w-100">
                                         <span class="me-2">Ajukan Kredit</span>
                                         <i class="bi bi-arrow-right-circle"></i>
                                     </a>
