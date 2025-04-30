@@ -61,20 +61,30 @@
 </head>
 <body>
   <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
     @yield('navbar')
-    
+    <!-- partial -->
     <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
       @yield('sidebar')
-      
+      <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
-          @yield('content')
+          <div class="row">
+            @yield('content')
+          </div>
         </div>
-        
-        @yield('footer')
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+       @yield('footer')
+        <!-- partial -->
       </div>
+      <!-- main-panel ends -->
     </div>
+    <!-- page-body-wrapper ends -->
   </div>
+  <!-- container-scroller -->
+
 
     <!-- Core JS Dependencies -->
     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>
@@ -90,7 +100,7 @@
     <script src="{{ asset('assets/js/template.js') }}"></script>
     <script src="{{ asset('assets/js/settings.js') }}"></script>
     <script src="{{ asset('assets/js/todolist.js') }}"></script>
-    <script src="{{ asset('assets/js/jquery.cookie.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.cookie.js') }}" type="text/javascript"></script>
     <script src="{{ asset('assets/js/dashboard.js') }}"></script>
     
     <!-- Font Awesome -->

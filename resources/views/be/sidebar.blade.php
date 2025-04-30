@@ -1,5 +1,5 @@
 <!-- resources/views/partials/_sidebar.blade.php -->
-<nav class="sidebar sidebar-offcanvas" id="sidebar">
+<nav class="sidebar sidebar-offcanvas " id="sidebar">
   <ul class="nav">
     <!-- Dashboard: Semua role -->
     <li class="nav-item">
@@ -109,7 +109,7 @@
     </li>
     @endif
 
-    <!-- User: Hanya Admin -->
+    <!-- User, Blog: Hanya Admin -->
     @if(auth()->check() && auth()->user()->role === 'admin')
     <li class="nav-item">
       <a class="nav-link" href="{{ url('user') }}">
@@ -117,16 +117,13 @@
         <span class="menu-title">User</span>
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url('blog-admin') }}">
+        <i class="mdi mdi-calendar-multiple menu-icon"></i>
+        <span class="menu-title">Blog</span>
+      </a>
+    </li>    
     @endif
 
-     <!-- Blog: Admin, CEO, Marketing -->
-     @if(auth()->check() && in_array(auth()->user()->role, ['admin', 'ceo', 'marketing']))
-     <li class="nav-item">
-       <a class="nav-link" href="{{ url('blog-admin') }}">
-         <i class="mdi mdi-calendar-multiple menu-icon"></i>
-         <span class="menu-title">Blog</span>
-       </a>
-     </li>
-     @endif
   </ul>
 </nav>
