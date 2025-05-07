@@ -68,6 +68,7 @@ class ListPengajuanKredit extends Component implements HasTable, HasForms
                         'Dibatalkan Penjual' => 'danger',
                         'Bermasalah' => 'danger',
                         'Diterima' => 'success',
+                        'Menunggu Pembayaran' => 'warning',
                         default => 'secondary',
                     })
                     ->alignCenter(),

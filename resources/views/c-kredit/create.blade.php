@@ -87,7 +87,10 @@
 
                 <div class="mb-3">
                     <label for="tgl_mulai_kredit" class="form-label">Tanggal Mulai Kredit</label>
-                    <input type="date" id="tgl_mulai_kredit" class="form-control" disabled>
+                    <input type="date" name="tgl_mulai_kredit" id="tgl_mulai_kredit" class="form-control" required>
+                    @error('tgl_mulai_kredit')
+                        <div class="text-danger">{{ $message }}</div>
+                    @enderror
                 </div>
                 
                 <div class="mb-3">
@@ -98,9 +101,9 @@
                 <div class="mb-3" hidden>
                     <label for="status_kredit" class="form-label">Status Kredit</label>
                     <input type="text" name="status_kredit" id="status_kredit" class="form-control" value="Dicicil" required>
-                    @error('status_kredit')
+                    {{-- @error('status_kredit')
                         <div class="text-danger">{{ $message }}</div>
-                    @enderror
+                    @enderror --}}
                 </div>
                 
                 <div class="mb-3">
@@ -145,20 +148,43 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // ====== TANGGAL ======
-        const tglMulai = new Date();
-        const tglSelesai = new Date(tglMulai);
-        tglSelesai.setMonth(tglSelesai.getMonth() + {{ $lamaCicilan }});
+        const tglMulaiInput = document.getElementById("tgl_mulai_kredit");
+        const tglSelesaiInput = document.getElementById("tgl_selesai_kredit");
+        const lamaCicilan = {{ $lamaCicilan }};
 
+        // Fungsi untuk menghitung tanggal selesai
+        function updateTanggalSelesai() {
+            const tglMulai = new Date(tglMulaiInput.value);
+            if (!isNaN(tglMulai)) {
+                const tglSelesai = new Date(tglMulai);
+                tglSelesai.setMonth(tglSelesai.getMonth() + lamaCicilan);
+
+                const formatDate = (date) => {
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                    const dd = String(date.getDate()).padStart(2, '0');
+                    return `${yyyy}-${mm}-${dd}`;
+                };
+
+                tglSelesaiInput.value = formatDate(tglSelesai);
+            } else {
+                tglSelesaiInput.value = '';
+            }
+        }
+
+        // Set tanggal mulai default ke hari ini
+        const today = new Date();
         const formatDate = (date) => {
             const yyyy = date.getFullYear();
             const mm = String(date.getMonth() + 1).padStart(2, '0');
             const dd = String(date.getDate()).padStart(2, '0');
             return `${yyyy}-${mm}-${dd}`;
         };
+        tglMulaiInput.value = formatDate(today);
+        updateTanggalSelesai(); // Hitung tanggal selesai untuk default
 
-        document.getElementById("tgl_mulai_kredit").value = formatDate(tglMulai);
-        document.getElementById("tgl_selesai_kredit").value = formatDate(tglSelesai);
+        // Update tanggal selesai setiap tanggal mulai berubah
+        tglMulaiInput.addEventListener('change', updateTanggalSelesai);
 
         // ====== SISA KREDIT ======
         const hargaKredit = {{ $hargaKredit }};

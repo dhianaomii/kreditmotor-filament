@@ -21,7 +21,7 @@
     <div class="container-fluid py-5">
         <div class="container py-5">
             <div class="row g-4">
-                <!-- Blog Filter Start -->
+                {{-- <!-- Blog Filter Start -->
                 <div class="col-lg-3 wow fadeInUp" data-wow-delay="0.1s">
                     <div class="bg-light rounded p-4 mb-4">
                         <h4 class="mb-3">Search</h4>
@@ -40,7 +40,7 @@
                             <a class="h5 mb" href="#"><i class="bi bi-arrow-right me-2"></i>Market Updates</a>
                         </div>
                     </div>
-                    {{-- <div class="bg-light rounded p-4 mb-4">
+                    <div class="bg-light rounded p-4 mb-4">
                         <h4 class="mb-3">Recent Posts</h4>
                         <div class="d-flex mb-3">
                             <img class="img-fluid rounded" src="/api/placeholder/80/80" alt="Recent Post" style="object-fit: cover;">
@@ -54,8 +54,8 @@
                             <img class="img-fluid rounded" src="/api/placeholder/80/80" alt="Recent Post" style="object-fit: cover;">
                             <a href="" class="h5 d-flex align-items-center ms-3">5 Tips to Maintain Your Motorcycle in Rainy Season</a>
                         </div>
-                    </div> --}}
-                </div>
+                    </div>
+                </div> --}}
                 <!-- Blog Filter End -->
                 
                 <!-- Blog List Start -->
@@ -83,23 +83,24 @@
                                     @else
                                         <p>{{$i['content']}}</p>
                                     @endif
-                                    <a href="blog-detail.html" class="btn btn-primary px-5 rounded-pill">Read More</a>
+                                    {{-- <a href="{{ route('blog.show') }}" class="btn btn-primary px-5 rounded-pill">Read More</a> --}}
+                                    <a href="{{ route('blog.show', $i->id) }}" class="btn btn-primary px-5 rounded-pill">Read More</a>
                                 </div>
                             </div>
                         </div>
                         @endforeach
-                        {{-- <!-- Pagination Start -->
-                        <div class="col-12">
-                            <div class="pagination d-flex justify-content-center mt-5">
-                                <a href="#" class="rounded mx-2 active">1</a>
-                                <a href="#" class="rounded mx-2">2</a>
-                                <a href="#" class="rounded mx-2">3</a>
-                                <a href="#" class="rounded mx-2"><i class="bi bi-arrow-right"></i></a>
-                            </div>
-                        </div>
-                        <!-- Pagination End --> --}}
                     </div>
                 </div>
+                <!-- Pagination Start -->
+                <div class="col-12">
+                    <div class="pagination d-flex justify-content-center mt-5">
+                        <a href="#" class="rounded mx-2 active">1</a>
+                        <a href="#" class="rounded mx-2">2</a>
+                        <a href="#" class="rounded mx-2">3</a>
+                        <a href="#" class="rounded mx-2"><i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+                <!-- Pagination End -->
                 <!-- Blog List End -->
             </div>
         </div>

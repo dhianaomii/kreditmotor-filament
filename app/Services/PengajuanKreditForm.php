@@ -150,6 +150,7 @@ final class PengajuanKreditForm {
                                 'Dibatalkan Penjual' => 'Dibatalkan Penjual',
                                 'Bermasalah' => 'Bermasalah',
                                 'Diterima' => 'Diterima',
+                                'Menunggu Pembayaran' => 'Menunggu Pembayaran'
                             ])
                             ->required(),
 

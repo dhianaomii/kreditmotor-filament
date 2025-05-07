@@ -45,6 +45,32 @@ class MainController extends Controller
         ]);
     }
 
+    public function blogdetail($id)
+    {
+        // Get the current blog post
+        $blog = Blog::with('user')->findOrFail($id);
+        
+        // Get recent blog posts (excluding current one)
+        $recentBlogs = Blog::with('user')
+                        ->where('id', '!=', $id)
+                        ->orderBy('publish_at', 'desc')
+                        ->take(3)
+                        ->get();
+        
+        // Get related blog posts (excluding current one)
+        // You can customize this query based on your needs (e.g., same category, tags, etc.)
+        $relatedBlogs = Blog::with('user')
+                        ->where('id', '!=', $id)
+                        ->inRandomOrder()
+                        ->take(3)
+                        ->get();
+        
+        return view('c-blog.show', compact('blog', 'recentBlogs', 'relatedBlogs'),
+        [
+            'title' => 'Blog',
+        ]);
+    }
+
     public function getblogadmin()
     {
         return view('blog.index',

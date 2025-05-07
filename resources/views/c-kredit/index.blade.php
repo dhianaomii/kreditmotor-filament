@@ -79,7 +79,13 @@
                                     @foreach($pengajuan as $item)
                                         <tr>
                                             <td>
-                                                <span class="badge bg-primary p-2">{{ $item->status_pengajuan }}</span>
+                                                @if ($item->status_pengajuan == 'Dibatalkan Pembeli' || $item->status_pengajuan == 'Dibatalkan Penjual' || $item->status_pengajuan == 'Bermasalah')
+                                                    <label class="badge bg-danger">{{ $item->status_pengajuan }}</label>
+                                                @elseif ($item->status_pengajuan == 'Diterima' || $item->status_pengajuan == 'Selesai')
+                                                    <label class="badge bg-success">{{ $item->status_pengajuan }}</label>
+                                                @elseif ($item->status_pengajuan == 'Menunggu Konfirmasi' || $item->status_pengajuan == 'Diproses' || $item->status_pengajuan == 'Menunggu Pembayaran')
+                                                    <label class="badge bg-warning">{{ $item->status_pengajuan }}</label>
+                                                @endif
                                             </td>
                                             <td class="fw-bold">{{ $item->motor->nama_motor ?? '-' }}</td>
                                             <td>IDR {{ number_format($item->harga_kredit, 2, ',', '.') }}</td>
@@ -94,17 +100,17 @@
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="keterangan_status_pengajuan" id="keterangan_status_pengajuan-{{ $item->id }}">
-                                                            <button type="button" class="btn btn-outline-danger btn-sm cancel-btn" data-id="{{ $item->id }}">
+                                                            <button type="button" class="btn btn-outline-danger cancel-btn" data-id="{{ $item->id }}">
                                                                 <i class="bi bi-x-circle me-2"></i>Batalkan
                                                             </button>
                                                         </form>
                                                     @endif
-                                                    @if($item->status_pengajuan == 'Diproses')
-                                                        <a href="{{ route('pengajuan.create', $item->id) }}" class="btn btn-red btn-sm">
-                                                            <i class="bi bi-credit-card me-2"></i>Bayar
+                                                    @if($item->status_pengajuan == 'Menunggu Pembayaran')
+                                                        <a href="{{ route('pengajuan.create', $item->id) }}" class="btn btn-outline-danger">
+                                                            <i class="bi bi-credit-card me-2"></i>Bayar DP
                                                         </a>
-                                                    @elseif($item->status_pengajuan == 'Diterima')
-                                                        <a href="{{ route('cicilan', $item->id) }}" class="btn btn-red btn-sm">
+                                                    @elseif ($item->status_pengajuan == 'Diterima')
+                                                        <a href="{{ route('cicilan', $item->id) }}" class="btn btn-red">
                                                             <i class="bi bi-info-circle me-2"></i>Lihat Detail
                                                         </a>
                                                     @endif

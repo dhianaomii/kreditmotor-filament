@@ -89,8 +89,8 @@
                         </div>
 
                         <div class="action-buttons mt-4 mb-2">
-                            <div class="row gx-3">
-                                <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="row ">
+                                {{-- <div class="col-md-6 mb-3 mb-md-0">
                                     <button class="btn btn-outline-danger border-2 fw-medium w-100 py-3 d-flex align-items-center justify-content-center" 
                                             {{ $motor->stok == 0 ? 'disabled' : '' }}
                                             data-bs-toggle="tooltip" 
@@ -98,22 +98,22 @@
                                         <i class="bi bi-cart-plus fs-5 me-2"></i>
                                         <span class="fw-medium">{{ $motor->stok == 0 ? 'Out of Stock' : 'Tambahkan ke Keranjang' }}</span>
                                     </button>
-                                </div>
-                                <div class="col-md-6">
+                                </div> --}}
+                                <div class="col-md">
                                     @if($motor->stok > 0)
-                                        @auth
-                                            <a href="{{ route('product.create', $motor->id) }}" class="btn btn-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm">
+                                        @auth('pelanggan')
+                                            <a href="{{ route('product.create', $motor->id) }}" class="btn btn-outline-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm">
                                                 <i class="bi bi-calendar-check fs-5 me-2"></i>
                                                 <span class="fw-medium">Ajukan Sekarang</span>
                                             </a>
                                         @else
-                                            <button type="button" class="btn btn-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" onclick="showLoginAlert()">
+                                            <button type="button" class="btn btn-outline-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" onclick="showLoginAlert()">
                                                 <i class="bi bi-calendar-check fs-5 me-2"></i>
                                                 <span class="fw-medium">Ajukan Sekarang</span>
                                             </button>
                                         @endauth
                                     @else
-                                        <button type="button" class="btn btn-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" onclick="showStockAlert()">
+                                        <button type="button" class="btn btn-outline-danger fw-bold w-100 py-3 d-flex align-items-center justify-content-center shadow-sm" onclick="showStockAlert()">
                                             <i class="bi bi-calendar-check fs-5 me-2"></i>
                                             <span class="fw-medium">Ajukan Sekarang</span>
                                         </button>

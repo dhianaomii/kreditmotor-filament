@@ -233,13 +233,13 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Harga Kredit
         const marginKredit = selectedCicilan ? parseFloat(selectedCicilan.getAttribute('data-margin-kredit')) : 0;
-        const hargaKredit = marginKredit ? Math.round(hargaJual - dp + (hargaJual * marginKredit / 100)) : 0;
+        const hargaKredit = marginKredit ? Math.round(hargaJual + (hargaJual * marginKredit / 100)) : 0;
         hargaKreditDisplay.value = hargaKredit ? formatRupiah(hargaKredit) : '';
         hargaKreditInput.value = hargaKredit || '';
 
         // Cicilan Per Bulan
         const tenor = selectedCicilan ? parseInt(selectedCicilan.getAttribute('data-tenor')) : 1;
-        const cicilanPerbulan = (hargaKredit && dp && tenor) ? Math.round((hargaKredit) / tenor + biayaAsuransi) : 0;
+        const cicilanPerbulan = (hargaKredit && dp && tenor) ? Math.round((hargaKredit - dp) / tenor + biayaAsuransi) : 0;
         cicilanPerbulanDisplay.value = cicilanPerbulan ? formatRupiah(cicilanPerbulan) : '';
         cicilanPerbulanInput.value = cicilanPerbulan || '';
     }

@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:pelanggan')->only(['create', 'store']);
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('auth:pelanggan')->only(['create', 'store']);
+    // }
 
     public function index(Request $request)
     {
@@ -36,6 +36,7 @@ class ProductController extends Controller
 
     public function create($id)
     {
+        $pelanggan = Auth::guard('pelanggan')->id();
         $motor = Motor::find($id);
         $jenisCicilan = JenisCicilan::all();
         $asuransi = Asuransi::all();
@@ -95,11 +96,11 @@ class ProductController extends Controller
             if (abs($request->dp - $Dp) > 1) {
                 return redirect()->back()->with('error', 'DP tidak valid.');
             }
-            $HargaKredit = $motor->harga_jual - $Dp + ($motor->harga_jual * $cicilan->margin_kredit / 100);
+            $HargaKredit = $motor->harga_jual + ($motor->harga_jual * $cicilan->margin_kredit / 100);
             if (abs($request->harga_kredit - $HargaKredit) > 1) {
                 return redirect()->back()->with('error', 'Harga kredit tidak valid.');
             }
-            $CicilanPerbulan = (($HargaKredit) / $cicilan->lama_cicilan) + $BiayaAsuransi;
+            $CicilanPerbulan = (($HargaKredit - $Dp) / $cicilan->lama_cicilan) + $BiayaAsuransi;
             if (abs($request->cicilan_perbulan - $CicilanPerbulan) > 1) {
                 return redirect()->back()->with('error', 'Cicilan per bulan tidak valid.');
             }

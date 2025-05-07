@@ -50,9 +50,9 @@ class ClientKreditController extends Controller
         $metodePembayarans = MetodePembayaran::all(); // Ambil semua metode pembayaran
 
         // Pastikan status pengajuan memungkinkan pembayaran
-        if ($pengajuan->status_pengajuan !== 'Diproses') {
-            return redirect()->route('pengajuan')->with('error', 'Pengajuan ini tidak dapat dibayar karena statusnya bukan "Diproses".');
-        }
+        // if ($pengajuan->status_pengajuan !== 'Diproses') {
+        //     return redirect()->route('pengajuan')->with('error', 'Pengajuan ini tidak dapat dibayar karena statusnya bukan "Diproses".');
+        // }
 
         return view('c-kredit.create', compact('pengajuan', 'metodePembayarans'))
         ->with('title', 'Pembayaran Kredit');

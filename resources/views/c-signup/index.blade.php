@@ -7,7 +7,7 @@
                 <div class="form-section bg-dark p-4 p-md-5 rounded-3 shadow">
                     <h1 class="display-5 text-white mb-4 text-center">Register</h1>
                     
-                    <form class="pt-3" action="/register" method="POST">
+                    <form class="pt-3" action="{{ route('register') }}" method="POST">
                         @csrf
 
                         @if (session('success'))
@@ -77,7 +77,7 @@
 
                         <div class="text-center text-white">
                             <p class="mb-0">Do you have an account? 
-                                <a href="{{ route('login')}}" class="text-primary">Login here</a>
+                                <a href="{{ route('login.form')}}" class="text-primary">Login here</a>
                             </p>
                         </div>
                     </form>

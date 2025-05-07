@@ -38,7 +38,7 @@
             <div class="mt-3 d-grid gap-2">
               <a class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" href="../../index.html">SIGN UP</a>
             </div>
-            <div class="text-center mt-4 font-weight-light"> Already have an account? <a href="login.html" class="text-primary">Login</a>
+            <div class="text-center mt-4 font-weight-light"> Already have an account? <a href="{{ route('signin.form')}}" class="text-primary">Login</a>
             </div>
           </form>
         </div>

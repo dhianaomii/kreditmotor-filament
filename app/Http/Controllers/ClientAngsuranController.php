@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PengajuanKredit;
+// use App\Models\Kredit;
 use App\Models\Kredit;
 use App\Models\Angsuran;
 use App\Models\MetodePembayaran;

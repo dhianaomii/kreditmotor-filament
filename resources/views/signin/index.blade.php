@@ -56,7 +56,7 @@
                 </div>
                 @endif
 
-                <form class="pt-3" action="/signin" method="POST">
+                <form class="pt-3" action="{{ route('signin') }}" method="POST">
                   @csrf
 
                   @if($errors->has('email'))
