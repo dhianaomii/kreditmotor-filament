@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('url_npwp');
             $table->string('url_slip_gaji');
             $table->string('url_foto');
-            $table->enum('status_pengajuan', ['Menunggu Konfirmasi', 'Diproses', 'Dibatalkan Pembeli', 'DIbatalkan Penjual', 'Bermasalah', 'Diterima']);
+            $table->enum('status_pengajuan', ['Menunggu Konfirmasi', 'Menunggu Pembayaran', 'Diproses', 'Dibatalkan Pembeli', 'DIbatalkan Penjual', 'Bermasalah', 'Diterima']);
             $table->string('keterangan_status_pengajuan')->nullable();
             $table->boolean('is_stock_returned')->default(false);
             $table->timestamps();

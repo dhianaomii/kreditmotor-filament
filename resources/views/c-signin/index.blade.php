@@ -7,14 +7,14 @@
                 <div class="form-section bg-dark p-4 p-md-5 rounded-3 shadow">
                     <h1 class="display-5 text-white mb-4 text-center">Login</h1>
                     
-                    <form class="pt-3" action="{{ route('login') }}" method="POST">
+                    <form class="pt-3" action="/login" method="POST">
                         @csrf
 
-                        @if (session('error'))
+                        {{-- @if (session('error'))
                             <div class="alert alert-danger">
                                 {{ session('error') }}
                             </div>
-                        @endif
+                        @endif --}}
 
                         <div class="d-grid mb-4">
                             <div class="form-floating">

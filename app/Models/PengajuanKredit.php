@@ -38,32 +38,34 @@ class PengajuanKredit extends Model
         'keterangan_status_pengajuan'
     ];
 
-    public function Pelanggan(): BelongsTo
-    {
-        return $this->belongsTo(Pelanggan::class);
-    }
+     // Relasi: Dimiliki oleh satu user
+   public function Pelanggan()
+   {
+       return $this->belongsTo(Pelanggan::class, 'pelanggan_id', 'id');
+   }
 
-    public function Motor(): BelongsTo
-    {
-        return $this->belongsTo(Motor::class);
-    }
+   // Relasi: Punya satu motor
+   public function Motor()
+   {
+       return $this->belongsTo(Motor::class, 'motor_id', 'id');
+   }
 
-    public function JenisCicilan(): BelongsTo
-    {
-        return $this->belongsTo(JenisCicilan::class);
-    }
+   // Relasi: Punya satu jenis cicilan
+   public function JenisCicilan()
+   {
+       return $this->belongsTo(JenisCicilan::class, 'jenis_cicilan_id', 'id');
+   }
+
+   // Relasi: Punya satu kredit
+   public function Kredit()
+   {
+       return $this->hasOne(Kredit::class, 'pengajuan_kredit_id', 'id');
+   }
 
     public function Asuransi(): BelongsTo
     {
         return $this->belongsTo(Asuransi::class);
     }   
-
-
-    public function kredit()
-    {
-        return $this->hasOne(Kredit::class, 'pengajuan_kredit_id');
-    }
-
 
 }
 

@@ -122,7 +122,13 @@
         <i class="mdi mdi-calendar-multiple menu-icon"></i>
         <span class="menu-title">Blog</span>
       </a>
-    </li>    
+    </li>   
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url('arsip') }}">
+        <i class="mdi mdi-calendar-multiple menu-icon"></i>
+        <span class="menu-title">Arsip</span>
+      </a>
+    </li>   
     @endif
 
   </ul>

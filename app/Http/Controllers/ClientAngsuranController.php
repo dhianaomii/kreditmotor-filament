@@ -107,26 +107,37 @@ class ClientAngsuranController extends Controller
     public function show($id)
     {
         try {
+            $pelanggan = Auth::guard('pelanggan')->user();
+
+            Log::info('Mencari kredit untuk pengajuan_id', ['id' => $id]);
+    
             $kredit = Kredit::with(['angsuran', 'PengajuanKredit.motor', 'PengajuanKredit.jenisCicilan'])
                 ->where('pengajuan_kredit_id', $id)
-                ->firstOrFail();
-
+                ->first();
+    
+            if (!$kredit) {
+                Log::error('Kredit tidak ditemukan', ['pengajuan_kredit_id' => $id]);
+                return redirect()->route('pengajuan')
+                    ->with('error', 'Kredit belum tersedia untuk pengajuan ini. Silakan hubungi administrator.');
+            }
+    
             Log::info('Menampilkan detail angsuran', [
                 'pengajuan_id' => $id,
                 'kredit_id' => $kredit->id,
                 'angsuran_count' => $kredit->angsuran->count()
             ]);
-
+    
             return view('c-angsuran.index', [
                 'kredit' => $kredit,
                 'pengajuan' => $kredit->PengajuanKredit,
                 'angsuranList' => $kredit->angsuran,
                 'title' => 'Angsuran Kredit',
+                'pelanggan' => $pelanggan,
             ]);
         } catch (\Exception $e) {
             Log::error('Gagal memuat detail angsuran', ['message' => $e->getMessage()]);
             return redirect()->route('pengajuan')
-                ->with('error', 'Gagal memuat detail angsuran');
+                ->with('error', 'Gagal memuat detail angsuran: ' . $e->getMessage());
         }
     }
 

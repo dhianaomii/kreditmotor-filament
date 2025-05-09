@@ -20,9 +20,10 @@ class Angsuran extends Model
         'keterangan',
     ];
 
-    public function Kredit(): BelongsTo
+    // Relasi: Dimiliki oleh satu kredit
+    public function Kredit()
     {
-        return $this->belongsTo(Kredit::class);
+        return $this->belongsTo(Kredit::class, 'kredit_id', 'id');
     }
 
 }

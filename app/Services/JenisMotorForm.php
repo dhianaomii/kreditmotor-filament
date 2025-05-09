@@ -41,7 +41,7 @@ final class JenisMotorForm {
             FileUpload::make('image')
                 ->image()
                 ->disk('public')
-                ->directory('photos')
+                ->directory('jenismotor')
                 ->visibility('public')
                 ->required()
                 ->label('Foto'),

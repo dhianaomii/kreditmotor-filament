@@ -26,7 +26,7 @@ final class MetodePembayaranForm {
                     ->label('Foto')
                     ->image()
                     ->disk('public')
-                    ->directory('photos')
+                    ->directory('metodebayar')
                     ->visibility('public'),
             ])
         ];

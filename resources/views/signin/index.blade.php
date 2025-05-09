@@ -77,7 +77,7 @@
                   <div class="mt-3 d-grid gap-2">
                     <button class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" type="submit">SIGN IN</button>
                   </div>
-                  <div class="my-2 d-flex justify-content-between align-items-center">
+                  {{-- <div class="my-2 d-flex justify-content-between align-items-center">
                     <div class="form-check">
                       <label class="form-check-label text-muted">
                         <input type="checkbox" class="form-check-input"> Keep me signed in </label>
@@ -85,12 +85,12 @@
                     <a href="#" class="auth-link text-black">Forgot password?</a>
                   </div>
                   <div class="mb-2 d-grid gap-2">
-                    {{-- <button type="button" class="btn btn-block btn-facebook auth-form-btn">
+                    <button type="button" class="btn btn-block btn-facebook auth-form-btn">
                       <i class="ti-facebook me-2"></i>Connect using facebook 
-                    </button> --}}
+                    </button>
                   </div>
                   <div class="text-center mt-4 font-weight-light"> Don't have an account? <a href="/signup" class="text-primary">Create</a>
-                  </div>
+                  </div> --}}
                 </form>
               </div>
             </div>

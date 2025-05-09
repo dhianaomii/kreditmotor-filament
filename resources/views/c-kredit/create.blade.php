@@ -29,7 +29,11 @@
                 <div class="col-md-6">
                     <h5 class="fw-bold mb-3">Detail Pembayaran</h5>
                     <div class="mb-2 d-flex justify-content-between">
-                        <span>Harga Motor:</span>
+                        <span>Harga Cash:</span>
+                        <span>IDR {{ number_format($pengajuan->harga_cash, 2, ',', '.') }}</span>
+                    </div>
+                    <div class="mb-2 d-flex justify-content-between">
+                        <span>Harga Kredit:</span>
                         <span>IDR {{ number_format($pengajuan->harga_kredit, 2, ',', '.') }}</span>
                     </div>
                     <div class="mb-2 d-flex justify-content-between">
@@ -38,11 +42,11 @@
                     </div>
                     <div class="mb-2 d-flex justify-content-between">
                         <span>Total Biaya Asuransi:</span>
-                        <span>IDR {{ number_format($pengajuan->biaya_asuransi_perbulan * $pengajuan->jenisCicilan->lama_cicilan, 2, ',', '.') }}</span>
+                        <span>IDR {{ number_format($pengajuan->biaya_asuransi_perbulan * $pengajuan->JenisCicilan->lama_cicilan, 2, ',', '.') }}</span>
                     </div>
                     <div class="mb-2 d-flex justify-content-between fw-bold">
                         <span>Total yang Harus Dibayar:</span>
-                        <span class="text-danger">IDR {{ number_format($pengajuan->dp + ($pengajuan->cicilan_perbulan * $pengajuan->jenisCicilan->lama_cicilan), 2, ',', '.') }}</span>
+                        <span class="text-danger">IDR {{ number_format($pengajuan->dp + ($pengajuan->cicilan_perbulan * $pengajuan->JenisCicilan->lama_cicilan), 2, ',', '.') }}</span>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -112,36 +116,38 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label for="keterangan_status_kredit" class="form-label">Keterangan (Opsional)</label>
-                    <textarea name="keterangan_status_kredit" id="keterangan_status_kredit" class="form-control" rows="3"></textarea>
-                </div>
-
-                <div class="mb-3">
                     <label for="metode_pembayaran_id" class="form-label">Metode Pembayaran</label>
                     <select name="metode_pembayaran_id" id="metode_pembayaran_id" class="form-select" required>
                         <option value="">-- Pilih Metode --</option>
                         @foreach($metodePembayarans as $metode)
-                            <option value="{{ $metode->id }}">{{ $metode->metode_pembayaran }}</option>
+                        <option value="{{ $metode->id }}">{{ $metode->metode_pembayaran }}</option>
                         @endforeach
                     </select>
                 </div>
-
+                
                 <div class="mb-3">
                     <label for="bukti_bayar" class="form-label">Upload Bukti Bayar</label>
                     <input type="file" name="bukti_bayar" id="bukti_bayar" class="form-control" accept=".jpg,.jpeg,.png,.pdf" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="keterangan_status_kredit" class="form-label">Keterangan (Opsional)</label>
+                    <textarea name="keterangan_status_kredit" id="keterangan_status_kredit" class="form-control" rows="3"></textarea>
                 </div>
 
                 <div class="d-grid">
                     <button type="submit" class="btn btn-dark">Bayar Sekarang</button>
                 </div>
             </form>
+
+            
         </div>
     </div>
     @endif
 </div>
 
 @php
-    $lamaCicilan = $pengajuan->jenisCicilan->lama_cicilan ?? 0;
+    $lamaCicilan = $pengajuan->JenisCicilan->lama_cicilan ?? 0;
     $hargaKredit = $pengajuan->harga_kredit ?? 0;
     $dp = $pengajuan->dp ?? 0;
 @endphp

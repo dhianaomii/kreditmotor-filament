@@ -11,6 +11,8 @@ class Kredit extends Model
 {
     use HasFactory;
 
+    protected $table = 'kredits';
+    
     protected $fillable = [
         'pengajuan_kredit_id',
         'metode_pembayaran_id',
@@ -47,16 +49,27 @@ class Kredit extends Model
         return $sisa;
     }
 
-    public function PengajuanKredit(): BelongsTo
+    // Relasi: Dimiliki oleh satu pengajuan kredit
+    public function PengajuanKredit()
     {
-        return $this->belongsTo(PengajuanKredit::class);
+        return $this->belongsTo(PengajuanKredit::class, 'pengajuan_kredit_id', 'id');
     }
-    public function MetodePembayaran(): BelongsTo
+
+    // Relasi: Punya banyak angsuran
+    public function Angsuran()
     {
-        return $this->belongsTo(MetodePembayaran::class);
+        return $this->hasMany(Angsuran::class, 'kredit_id', 'id');
     }
-    public function angsuran()
+
+    // Relasi: Punya satu pengiriman
+    public function Pengiriman()
     {
-        return $this->hasMany(Angsuran::class, 'kredit_id');
+        return $this->hasOne(Pengirimans::class, 'kredit_id', 'id');
+    }
+
+    // Relasi: Punya satu metode pembayaran
+    public function MetodePembayaran()
+    {
+        return $this->belongsTo(MetodePembayaran::class, 'metode_pembayaran_id', 'id');
     }
 }

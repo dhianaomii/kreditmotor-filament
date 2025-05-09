@@ -48,20 +48,20 @@ final class MotorForm{
                 ->label('Foto Utama')
                 ->image()
                 ->disk('public')
-                ->directory('photos')
+                ->directory('motor')
                 ->visibility('public')
                 ->required(),
             FileUpload::make('foto2')
                 ->label('Foto Tambahan 1')
                 ->image()
                 ->disk('public')
-                ->directory('photos')
+                ->directory('motor')
                 ->visibility('public'),
             FileUpload::make('foto3')
                 ->label('Foto Tambahan 2')
                 ->image()
                 ->disk('public')
-                ->directory('photos')
+                ->directory('motor')
                 ->visibility('public'),
             ]),
         ];

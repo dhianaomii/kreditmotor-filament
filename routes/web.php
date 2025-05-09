@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\ArsipController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PelangganController;
@@ -12,7 +13,7 @@ use App\Http\Controllers\WebcamController;
 use Illuminate\Support\Facades\Route;
 
 use App\Livewire\CameraCapture;
-
+use GuzzleHttp\Client;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,7 +56,7 @@ Route::get('product/{id}/create', [ProductController::class, 'create'])->name('p
 Route::post('product', [ProductController::class, 'store'])->name('product.store')->middleware('auth:pelanggan'); // eksekusi tambah pengajuan kredit
 
 Route::get('pengajuan', [ClientKreditController::class, 'index'])->name('pengajuan')->middleware('auth:pelanggan'); // menampilkan halaman pengajuan kredit sesuai dengan user yang login
-Route::get('pengajuan/create', [ClientKreditController::class, 'create'])->name('pengajuan.create')->middleware('auth:pelanggan'); // menampilkan halaman form tambah kredit
+Route::get('pengajuan/{pengajuanId}/create', [ClientKreditController::class, 'create'])->name('pengajuan.create')->middleware('auth:pelanggan'); // menampilkan halaman form tambah kredit
 Route::post('pengajuan', [ClientKreditController::class, 'store'])->name('pengajuan.store')->middleware('auth:pelanggan'); // eksekusi tambah kredit
 Route::patch('pengajuan/{id}/cancel', [ClientKreditController::class, 'updateStatus'])->name('pengajuan.cancel')->middleware('auth:pelanggan')
     ->defaults('action', 'cancel');
@@ -63,8 +64,8 @@ Route::patch('pengajuan/{id}/cancel', [ClientKreditController::class, 'updateSta
 Route::get('cicilan/{id}', [ClientAngsuranController::class, 'show'])->name('cicilan')->middleware('auth:pelanggan'); // menampilkan halaman angsuran sesuai dengan user yang login
 Route::post('cicilan/{pengajuanId}', [ClientAngsuranController::class, 'store'])->name('cicilan.store')->middleware('auth:pelanggan'); // eksekusi simpan angsuran
 
-Route::get('kirim/{id}/create', [ClientPengirimanController::class, 'create'])->name('kirim.create')->middleware('auth:pelanggan'); // menampilkan halaman form kirim angsuran
-Route::post('kirim', [ClientAngsuranController::class, 'store'])->name('kirim.store')->middleware('auth:pelanggan'); // eksekusi kirim angsuran
+Route::get('kirim/{pengajuanId}/create', [ClientPengirimanController::class, 'create'])->name('kirim.create')->middleware('auth:pelanggan'); // menampilkan halaman form kirim angsuran
+Route::post('kirim/{pengajuanId}', [ClientPengirimanController::class, 'store'])->name('kirim.store')->middleware('auth:pelanggan'); // eksekusi kirim angsuran
 
 // ROUTE ADMIN PAGE
 
@@ -84,6 +85,14 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('motor', [MainController::class, 'getmotor'])->name('motor');
     Route::get('metode-pembayaran', [MainController::class, 'getmetodepembayaran'])->name('metode-pembayaran');
     Route::get('user', [MainController::class, 'getuser'])->name('user');
+    Route::get('asuransi', [MainController::class, 'getasuransi'])->name('asuransi');
+    Route::get('jenis-cicilan', [MainController::class, 'getjeniscicilan'])->name('jenis-cicilan');
+    Route::get('arsip', [ArsipController::class, 'index'])->name('arsip');
+    Route::get('/export/pelanggan/pdf', [ArsipController::class, 'exportPelangganPdf'])->name('export.pelanggan.pdf');
+    Route::get('/export/kredit/pdf', [ArsipController::class, 'exportKreditPdf'])->name('export.kredit.pdf');
+    Route::get('/export/pengajuan/pdf', [ArsipController::class, 'exportPengajuanPdf'])->name('export.pengajuan.pdf');
+    Route::get('/export/angsuran/pdf', [ArsipController::class, 'exportAngsuranPdf'])->name('export.angsuran.pdf');
+    Route::get('/export/pengiriman/pdf', [ArsipController::class, 'exportPengirimanPdf'])->name('export.pengiriman.pdf');
 });
 
 Route::middleware(['auth', 'role:admin,ceo,marketing'])->group(function () {

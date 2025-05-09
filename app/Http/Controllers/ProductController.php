@@ -49,7 +49,7 @@ class ProductController extends Controller
     {
         try {
             $activePengajuan = PengajuanKredit::where('pelanggan_id', $request->pelanggan_id)
-                ->where('status_pengajuan', ['Menunggu Konfirmasi', 'Diproses', 'Diterima'])
+                ->where('status_pengajuan', ['Menunggu Konfirmasi', 'Diproses', 'Menunggu Pembayaran'])
                 ->count();
             if ($activePengajuan >= 1) {
                 return redirect()->back()->with('error', 'Anda telah mencapai batas maksimal pengajuan aktif.');

@@ -7,6 +7,7 @@ use App\Models\PengajuanKredit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PelangganController extends Controller
 {
@@ -46,24 +47,24 @@ class PelangganController extends Controller
             'no_hp' => 'required|numeric',
             'password' => 'required|min:6',
         ]);
-    
+
         try {
             $user = Pelanggan::create([
                 'nama_pelanggan' => $request->nama_pelanggan,
                 'email' => $request->email,
                 'no_hp' => $request->no_hp,
-                'password' => $request->password // otomatis hashed karena ada cast di model
+                'password' => $request->password // Otomatis hashed karena ada cast di model
             ]);
-    
+
             if ($user) {
                 Auth::guard('pelanggan')->login($user);
                 return redirect()->route('/')->with('success', 'Register berhasil!');
             } else {
-                return redirect()->route('register')->with('error', 'Register gagal, silakan coba lagi.');
+                return redirect()->route('register.form')->with('error', 'Register gagal, silakan coba lagi.');
             }
         } catch (\Exception $e) {
-            // Tambahkan log jika perlu
-            return redirect()->route('register')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Register error: ' . $e->getMessage());
+            return redirect()->route('register.form')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -72,23 +73,33 @@ class PelangganController extends Controller
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-    
-        $pelanggan = Pelanggan::where('email', $request->email)->first();
-        
-        if ($pelanggan && $pelanggan->is_blocked) {
-            return back()->with(['error' => 'Akun Anda telah diblokir. Silakan hubungi admin.'])->withInput();
+        try {
+            // Validate the request
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required'
+            ]);
+
+            // Check if the user exists and is blocked
+            $pelanggan = Pelanggan::where('email', $request->email)->first();
+
+            if ($pelanggan && $pelanggan->is_blocked) {
+                return redirect()->route('login.form')->with('error', 'Akun Anda telah diblokir. Silakan hubungi admin.');
+            }
+
+            // Attempt authentication
+            if (Auth::guard('pelanggan')->attempt($request->only('email', 'password'))) {
+                return redirect()->route('/')->with('success', 'Login berhasil!');
+            }
+
+            // If authentication fails
+            return redirect()->route('login.form')->with('error', 'Email atau Password salah.');
+        } catch (\Exception $e) {
+            // Catch any unexpected errors (e.g., database issues)
+            return redirect()->route('login.form')->with('error', 'Terjadi kesalahan. Silakan coba lagi nanti.');
         }
-    
-        if (Auth::guard('pelanggan')->attempt($request->only('email', 'password'))) {
-            return redirect()->route('/')->with('success', 'Login berhasil!');
-        }
-    
-        return back()->with(['error' => 'Email atau Password salah.'])->withInput();
     }
+
     public function logout()
     {
         Auth::guard('pelanggan')->logout();

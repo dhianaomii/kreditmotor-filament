@@ -146,11 +146,11 @@ final class PengajuanKreditForm {
                             ->options([
                                 'Menunggu Konfirmasi' => 'Menunggu Konfirmasi',
                                 'Diproses' => 'Diproses',
+                                'Menunggu Pembayaran' => 'Menunggu Pembayaran',
+                                'Diterima' => 'Diterima',
                                 'Dibatalkan Pembeli' => 'Dibatalkan Pembeli',
                                 'Dibatalkan Penjual' => 'Dibatalkan Penjual',
-                                'Bermasalah' => 'Bermasalah',
-                                'Diterima' => 'Diterima',
-                                'Menunggu Pembayaran' => 'Menunggu Pembayaran'
+                                'Bermasalah' => 'Bermasalah'
                             ])
                             ->required(),
 

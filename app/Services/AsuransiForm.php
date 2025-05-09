@@ -36,7 +36,7 @@ final class AsuransiForm{
                         ->label('Logo Perusahaan')
                         ->image()
                         ->disk('public')
-                        ->directory('photos')
+                        ->directory('asuransi')
                         ->visibility('public'),
                 ])
             ])

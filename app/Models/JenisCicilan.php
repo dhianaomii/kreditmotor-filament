@@ -17,5 +17,10 @@ class JenisCicilan extends Model
         'dp',
     ];
 
+    // Relasi: Punya banyak pengajuan kredit
+    public function PengajuanKredit()
+    {
+        return $this->hasMany(PengajuanKredit::class, 'jenis_cicilan_id', 'id');
+    }
     
 }

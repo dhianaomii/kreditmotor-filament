@@ -39,7 +39,7 @@ final class AngsuranForm {
                     ->label('Bukti Pembayaran')
                     ->image()
                     ->disk('public')
-                    ->directory('bukti_angsuran')
+                    ->directory('angsuran')
                     ->visibility('public'),
                 TextInput::make('keterangan')
                     ->label('Keterangan')

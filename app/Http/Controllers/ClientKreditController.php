@@ -23,17 +23,22 @@ class ClientKreditController extends Controller
      */
     public function index()
     {
+        // Check if the user is authenticated under the 'pelanggan' guard
+        if (!Auth::guard('pelanggan')->check()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+    
         $pelangganId = Auth::guard('pelanggan')->id();
         
         // Ambil data pengajuan kredit dengan relasi
-        $pengajuan = PengajuanKredit::with(['motor', 'jenisCicilan', 'asuransi', 'kredit'])
+        $pengajuan = PengajuanKredit::with(['Motor', 'JenisCicilan', 'Asuransi', 'Kredit'])
             ->where('pelanggan_id', $pelangganId)
             ->get();
         
         // Ambil data pengiriman terkait
-        $pengiriman = Pengirimans::whereHas('kredit.PengajuanKredit', function ($query) use ($pelangganId) {
+        $pengiriman = Pengirimans::whereHas('Kredit.PengajuanKredit', function ($query) use ($pelangganId) {
             $query->where('pelanggan_id', $pelangganId);
-        })->with(['kredit.PengajuanKredit.motor'], ['kredit.PengajuanKredit.Pelanggan'])->get();
+        })->with(['Kredit.PengajuanKredit.Motor', 'Kredit.PengajuanKredit.Pelanggan'])->get();
     
         return view('c-kredit.index', compact('pengajuan', 'pengiriman'), [
             'title' => 'Pengajuan Saya'
@@ -42,11 +47,13 @@ class ClientKreditController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create($pengajuanId)
     {
         $pelanggan = Auth::guard('pelanggan')->id();
-        $pengajuan = PengajuanKredit::where('pelanggan_id', $pelanggan)
-            ->firstOrFail();
+        $pengajuan = PengajuanKredit::with(['JenisCicilan', 'Motor'])
+        ->where('pelanggan_id', Auth::guard('pelanggan')->id())
+        ->where('id', $pengajuanId)
+        ->firstOrFail();
         $metodePembayarans = MetodePembayaran::all(); // Ambil semua metode pembayaran
 
         // Pastikan status pengajuan memungkinkan pembayaran
@@ -78,12 +85,12 @@ class ClientKreditController extends Controller
             Log::info('Validation passed');
     
             // Ambil data pengajuan
-            $pengajuan = PengajuanKredit::with('jenisCicilan')->findOrFail($request->pengajuan_kredit_id);
+            $pengajuan = PengajuanKredit::with('JenisCicilan')->findOrFail($request->pengajuan_kredit_id);
             Log::info('Pengajuan fetched', $pengajuan->toArray());
     
             // Hitung tanggal mulai dan selesai kredit
             $tglMulai = Carbon::now();
-            $tglSelesai = $tglMulai->copy()->addMonths($pengajuan->jenisCicilan->lama_cicilan ?? 0);
+            $tglSelesai = $tglMulai->copy()->addMonths($pengajuan->JenisCicilan->lama_cicilan ?? 0);
     
             // Upload file bukti pembayaran
             $path = null;

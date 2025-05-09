@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-
 <!-- Header Start -->
 <div class="container-fluid bg-breadcrumb">
     <div class="container text-center py-5" style="max-width: 900px;">
@@ -38,10 +37,6 @@
                         </select>
                     </div>
                 </form>
-                <!-- Tombol Search untuk Modal -->
-                {{-- <button class="btn btn-primary ms-3 rounded-circle" data-bs-toggle="modal" data-bs-target="#searchModal">
-                    <i class="bi bi-search"></i>
-                </button> --}}
             </div>
         </div>
     </div>
@@ -94,11 +89,29 @@
                         <div class="blog-content p-4 flex-grow-1 d-flex flex-column">
                             <div class="blog-comment d-flex justify-content-between py-2 px-3 mb-2">
                                 <div class="small {{ $product->stok == 0 ? 'text-muted' : 'text-white' }}">
-                                    {{ $product->nama_motor }} {{ $product->JenisMotor->jenis }} - {{ $product->JenisMotor->merk }}
+                                    @php
+                                        $motorDetails = $product->nama_motor . ' ' . $product->JenisMotor->jenis . ' - ' . $product->JenisMotor->merk;
+                                        $maxLength = 20; // Adjust as needed
+                                    @endphp
+                                    @if(strlen($motorDetails) > $maxLength)
+                                        {{ substr($motorDetails, 0, strrpos(substr($motorDetails, 0, $maxLength), ' ')) . '...' }}
+                                    @else
+                                        {{ $motorDetails }}
+                                    @endif
                                 </div>
                                 <div class="small"><i class="fa fa-calendar text-primary me-2"></i></div>
                             </div>
-                            <p class="mb-2 {{ $product->stok == 0 ? 'text-muted' : 'text-black' }}">{{ $product->deskripsi_motor }}</p>
+                            @php
+                                $deskripsi = $product->deskripsi_motor;
+                                $deskripsiMaxLength = 50; // Adjust as needed
+                            @endphp
+                            <p class="mb-2 {{ $product->stok == 0 ? 'text-muted' : 'text-black' }}">
+                                @if(strlen($deskripsi) > $deskripsiMaxLength)
+                                    {{ substr($deskripsi, 0, strrpos(substr($deskripsi, 0, $deskripsiMaxLength), ' ')) . '...' }}
+                                @else
+                                    {{ $deskripsi }}
+                                @endif
+                            </p>
                             <div class="d-flex align-items-center mb-2">
                                 @if ($product->stok > 10)
                                     <span class="badge bg-success">{{ $product->stok }} Available</span>
@@ -135,24 +148,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    .blog-item.bg-secondary {
-        background-color: #e9ecef !important; /* Warna abu-abu */
-        opacity: 0.8; /* Sedikit transparan */
-    }
-    .blog-item.bg-secondary .blog-content {
-        background-color: transparent !important;
-    }
-    .blog-item.bg-secondary .btn-secondary:disabled {
-        background-color: #6c757d !important;
-        border-color: #6c757d !important;
-        cursor: not-allowed;
-    }
-    .blog-item.bg-secondary .text-muted {
-        color: #6c757d !important;
-    }
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

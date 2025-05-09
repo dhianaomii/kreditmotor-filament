@@ -58,8 +58,8 @@ class ListPelanggan extends Component implements HasTable, HasForms
             ->columns([
                 BooleanColumn::make('is_blocked')
                     ->label('Status Blokir')
-                    ->trueIcon('heroicon-o-x-circle')
-                    ->falseIcon('heroicon-o-check-circle'),
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueIcon('heroicon-o-check-circle'),
                 TextColumn::make('nama_pelanggan')
                     ->label('Nama Pelanggan'),
                 TextColumn::make('email')

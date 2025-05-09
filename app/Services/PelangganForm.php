@@ -41,7 +41,7 @@ final class PelangganForm
                         ->label('Foto Pelanggan')
                         ->image()
                         ->disk('public')
-                        ->directory('photos')
+                        ->directory('pelanggan')
                         ->visibility('public'),
                 ]),
                 Fieldset::make('Alamat 1')->schema([

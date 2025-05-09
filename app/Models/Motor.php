@@ -29,5 +29,10 @@ class Motor extends Model
     {
         return $this->belongsTo(JenisMotor::class);
     }
+
+    public function PengajuanKredit()
+    {
+        return $this->hasMany(PengajuanKredit::class, 'motor_id', 'id');
+    }
     
 }
