@@ -22,6 +22,9 @@ class Kredit extends Model
         'url_bukti_bayar',
         'sisa_kredit',
         'keterangan_status_kredit',      
+        'order_id',
+        'payment_status',
+        'snap_token'
     ];
 
     // Jumlah yang sudah dibayar
