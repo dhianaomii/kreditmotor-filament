@@ -107,7 +107,7 @@ class ClientKreditController extends Controller
                     'tgl_selesai_kredit' => $tglSelesai,
                     'sisa_kredit' => $pengajuan->harga_kredit - $pengajuan->dp,
                     'status_kredit' => 'Dicicil',
-                    'metode_pembayaran_id' => 1, // Default metode pembayaran untuk Midtrans
+                    'metode_pembayaran_id' => 1, // Placeholder sementara
                 ]);
                 if ($updateResult) {
                     Log::info('Kredit updated successfully', ['kredit_id' => $kredit->id, 'order_id' => $orderId]);
@@ -118,7 +118,7 @@ class ClientKreditController extends Controller
             } else {
                 $kredit = Kredit::create([
                     'pengajuan_kredit_id' => $pengajuan->id,
-                    'metode_pembayaran_id' => 1, // Default metode pembayaran untuk Midtrans
+                    'metode_pembayaran_id' => 1, // Placeholder sementara
                     'status_kredit' => 'Dicicil',
                     'sisa_kredit' => $pengajuan->harga_kredit - $pengajuan->dp,
                     'payment_status' => 'pending',
@@ -177,10 +177,10 @@ class ClientKreditController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
+    
     /**
-     * Menangani callback dari Midtrans
-     */
+    * Menangani callback dari Midtrans
+    */
     public function handleCallback(Request $request)
     {
         try {
@@ -191,11 +191,29 @@ class ClientKreditController extends Controller
             $transaction = $notif->transaction_status;
             $orderId = $notif->order_id;
             $fraud = $notif->fraud_status;
+            $paymentType = $notif->payment_type;
+
+             // Ambil data bank dari va_numbers jika ada
+            $bank = null;
+            $vaNumber = null;
+            if (isset($notif->va_numbers) && is_array($notif->va_numbers) && !empty($notif->va_numbers)) {
+                $vaData = $notif->va_numbers[0] ?? null; // Ambil data VA pertama
+                if (is_object($vaData)) {
+                    $bank = $vaData->bank ?? null; // Misalnya "bca"
+                    $vaNumber = $vaData->va_number ?? null; // Misalnya "34599548772426185449646"
+                }
+            }
+
+            $merchantId = $notif->merchant_id ?? null; // Ambil merchant_id jika ada
 
             Log::info('Received Midtrans callback', [
                 'transaction_status' => $transaction,
                 'order_id' => $orderId,
                 'fraud_status' => $fraud,
+                'payment_type' => $paymentType,
+                'bank' => $bank,
+                'va_number' => $vaNumber,
+                'merchant_id' => $merchantId,
             ]);
 
             // Validasi signature key
@@ -218,6 +236,29 @@ class ClientKreditController extends Controller
                 Log::error('Pengajuan not found', ['pengajuan_kredit_id' => $kredit->pengajuan_kredit_id]);
                 return response()->json(['status' => 'Pengajuan not found'], 404);
             }
+
+            // Normalisasi payment_type dari Midtrans menjadi nama yang lebih readable
+            $paymentMethodName = $this->normalizePaymentType($paymentType);
+            $tempatBayar = $bank ? "Bank $bank" : null;
+
+            // Cari atau buat metode pembayaran berdasarkan tempat_bayar
+            $metodePembayaran = MetodePembayaran::where('tempat_bayar', $tempatBayar)->first();
+            if ($metodePembayaran) {
+                Log::info('Payment method found by tempat_bayar', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
+            } else {
+                $metodePembayaran = MetodePembayaran::create([
+                    'metode_pembayaran' => $paymentMethodName,
+                    'tempat_bayar' => $tempatBayar,
+                    'no_rekening' => null, // Tetap null sesuai permintaan
+                    'logo' => null,
+                ]);
+                Log::info('New payment method created', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
+            }
+
+            // Update metode_pembayaran_id di kredit
+            $kredit->metode_pembayaran_id = $metodePembayaran->id;
+            $kredit->save();
+            Log::info('Updated metode_pembayaran_id in kredit', ['kredit_id' => $kredit->id, 'metode_pembayaran_id' => $metodePembayaran->id]);
 
             if ($transaction == 'capture' && $fraud == 'accept') {
                 $kredit->payment_status = 'paid';
@@ -267,6 +308,29 @@ class ClientKreditController extends Controller
             Log::error('Callback handling failed', ['error' => $e->getMessage(), 'order_id' => $notif->order_id ?? 'N/A']);
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
+    }
+    
+    /**
+     * Normalisasi payment_type dari Midtrans menjadi nama yang lebih readable
+     */
+    private function normalizePaymentType($paymentType)
+    {
+        $paymentMethods = [
+            'bank_transfer' => 'Bank Transfer',
+            'qris' => 'QRIS',
+            'credit_card' => 'Credit Card',
+            'gopay' => 'GoPay',
+            'shopeepay' => 'ShopeePay',
+            'bca_va' => 'BCA Virtual Account',
+            'bni_va' => 'BNI Virtual Account',
+            'bri_va' => 'BRI Virtual Account',
+            'mandiri_bill' => 'Mandiri Bill',
+            'permata_va' => 'Permata Virtual Account',
+            'alfamart' => 'Alfamart',
+            'indomaret' => 'Indomaret',
+        ];
+
+        return $paymentMethods[$paymentType] ?? ucfirst(str_replace('_', ' ', $paymentType));
     }
 
     /**
