@@ -40,7 +40,7 @@
                         <div class="goal-item d-flex p-4">
                             <div class="d-flex me-4">
                                 <div class="bg-primary d-inline p-3" style="width: 80px; height: 80px;">
-                                    <img src="{{ asset ('fe/img/icon-1.png')}}" class="img-fluid" alt="">
+                                    <img src="{{ asset ('fe/img/fast.png')}}" class="img-fluid" alt="">
                                 </div>
                             </div>
                             <div>
@@ -51,7 +51,7 @@
                         <div class="goal-item d-flex p-4 mb-4">
                             <div class="d-flex me-4">
                                 <div class="bg-primary d-inline p-3" style="width: 80px; height: 80px;">
-                                    <img src="{{ asset ('fe/img/icon-6.png')}}" class="img-fluid" alt="">
+                                    <img src="{{ asset ('fe/img/low-price.png')}}" class="img-fluid" alt="">
                                 </div>
                             </div>
                             <div>
@@ -88,7 +88,13 @@
                         </div>
                         <div class="feature-content p-4">
                             <h4 class="mb-3">{{ $i->nama_motor}}</h4>
-                            <p class="mb-2">{{ $i->deskripsi_motor}}</p>
+                            <p class="mb-2">
+                                @if(strlen($i->deskripsi_motor) > 50)
+                                    {{ substr($i->deskripsi_motor, 0, strrpos(substr($i->deskripsi_motor, 0, 50), ' ')) . '...' }}
+                                @else
+                                    {{ $i->deskripsi_motor }}
+                                @endif
+                            </p>
                             @if($i->stok > 10)
                                 <span class="mb-2 badge bg-success">{{ $i->stok }} Available</span>
                             @elseif($i->stok > 0)
@@ -130,70 +136,30 @@
                 </p>
             </div>
             <div class="blog-carousel owl-carousel">
+                @foreach ($blog as $i )
+                
                 <div class="blog-item wow fadeInUp" data-wow-delay="0.2s">
                     <div class="blog-img p-4 pb-0">
                         <a href="#">
-                            <img src="{{ asset ('fe/img/feature-4.jpg')}}" class="img-fluid w-100" alt="">
+                            <img src="{{ asset ('storage/'. $i->image)}}" class="img-fluid w-100" alt="">
                         </a>
                     </div>
                     <div class="blog-content p-4">
                         <div class="blog-comment d-flex justify-content-between py-2 px-3 mb-4">
-                            <div class="small"><span class="fa fa-user text-primary me-2"></span> Admin</div>
-                            <div class="small"><span class="fa fa-calendar text-primary me-2"></span> 15 Apr 2025</div>
+                            <div class="small"><span class="fa fa-user text-primary me-2"></span> {{$i->User->nama}}</div>
+                            <div class="small"><span class="fa fa-calendar text-primary me-2"></span>{{$i->publish_at}}</div>
                         </div>
-                        <a href="#" class="h4 d-inline-block mb-3">How to Choose Your First Motorcycle</a>
-                        <p class="mb-3">Tips for new riders to select the perfect motorcycle that matches their skill level, budget, and riding style.</p>
-                        <a href="#" class="btn btn-dark py-2 px-4 ms-2"> <span class="me-2">Read More</span>  <i class="fa fa-arrow-right"></i></a>
+                        <a href="#" class="h4 d-inline-block mb-3">{{$i->judul}}</a>
+                        <p class="mb-3">
+                            @if(strlen($i->content) > 50)
+                                {{ substr($i->content, 0, strrpos(substr($i->content, 0, 50), ' ')) . '...' }}
+                            @else
+                                {{ $i->content }}
+                            @endif</p>
+                        <a href="{{route('blog.show', $i->id)}}" class="btn btn-dark py-2 px-4 ms-2"> <span class="me-2">Read More</span>  <i class="fa fa-arrow-right"></i></a>
                     </div>
                 </div>
-                <div class="blog-item wow fadeInUp" data-wow-delay="0.4s">
-                    <div class="blog-img p-4 pb-0">
-                        <a href="#">
-                            <img src="{{ asset ('fe/img/feature-3.jpg')}}" class="img-fluid w-100" alt="">
-                        </a>
-                    </div>
-                    <div class="blog-content p-4">
-                        <div class="blog-comment d-flex justify-content-between py-2 px-3 mb-4">
-                            <div class="small"><span class="fa fa-user text-primary me-2"></span> Admin</div>
-                            <div class="small"><span class="fa fa-calendar text-primary me-2"></span> 10 Apr 2025</div>
-                        </div>
-                        <a href="#" class="h4 d-inline-block mb-3">Understanding Motorcycle Financing</a>
-                        <p class="mb-3">A comprehensive guide to motorcycle credit terms, interest rates, and how to get the best deal for your budget.</p>
-                        <a href="#" class="btn btn-dark py-2 px-4 ms-2"> <span class="me-2">Read More</span>  <i class="fa fa-arrow-right"></i></a>
-                    </div>
-                </div>
-                <div class="blog-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="blog-img p-4 pb-0">
-                        <a href="#">
-                            <img src="{{ asset ('fe/img/feature-2.jpg')}}" class="img-fluid w-100" alt="">
-                        </a>
-                    </div>
-                    <div class="blog-content p-4">
-                        <div class="blog-comment d-flex justify-content-between py-2 px-3 mb-4">
-                            <div class="small"><span class="fa fa-user text-primary me-2"></span> Admin</div>
-                            <div class="small"><span class="fa fa-calendar text-primary me-2"></span> 5 Apr 2025</div>
-                        </div>
-                        <a href="#" class="h4 d-inline-block mb-3">Essential Motorcycle Maintenance</a>
-                        <p class="mb-3">Regular maintenance tips to keep your motorcycle running smoothly and maintain its value over time.</p>
-                        <a href="#" class="btn btn-dark py-2 px-4 ms-2"> <span class="me-2">Read More</span>  <i class="fa fa-arrow-right"></i></a>
-                    </div>
-                </div>
-                <div class="blog-item">
-                    <div class="blog-img p-4 pb-0">
-                        <a href="#">
-                            <img src="{{ asset ('fe/img/feature-1.jpg')}}" class="img-fluid w-100" alt="">
-                        </a>
-                    </div>
-                    <div class="blog-content p-4">
-                        <div class="blog-comment d-flex justify-content-between py-2 px-3 mb-4">
-                            <div class="small"><span class="fa fa-user text-primary me-2"></span> Admin</div>
-                            <div class="small"><span class="fa fa-calendar text-primary me-2"></span> 1 Apr 2025</div>
-                        </div>
-                        <a href="#" class="h4 d-inline-block mb-3">Best Motorcycles for Beginners</a>
-                        <p class="mb-3">Our top recommendations for new riders looking for safe, manageable, and affordable first motorcycles.</p>
-                        <a href="#" class="btn btn-dark py-2 px-4 ms-2"> <span class="me-2">Read More</span>  <i class="fa fa-arrow-right"></i></a>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>

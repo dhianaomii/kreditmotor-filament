@@ -10,7 +10,7 @@
         <div class="container text-center py-5" style="max-width: 900px;">
             <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">Blog & Articles</h4>
             <ol class="breadcrumb d-flex justify-content-center mb-0 wow fadeInDown" data-wow-delay="0.3s">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                 <li class="breadcrumb-item active text-primary">Blog</li>
             </ol>    
         </div>
@@ -20,44 +20,7 @@
     <!-- Blog Start -->
     <div class="container-fluid py-5">
         <div class="container py-5">
-            <div class="row g-4">
-                {{-- <!-- Blog Filter Start -->
-                <div class="col-lg-3 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="bg-light rounded p-4 mb-4">
-                        <h4 class="mb-3">Search</h4>
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Keyword">
-                            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
-                        </div>
-                    </div>
-                    <div class="bg-light rounded p-4 mb-4">
-                        <h4 class="mb-3">Categories</h4>
-                        <div class="d-flex flex-column justify-content-start">
-                            <a class="h5 mb-3" href="#"><i class="bi bi-arrow-right me-2"></i>Motorcycle Financing</a>
-                            <a class="h5 mb-3" href="#"><i class="bi bi-arrow-right me-2"></i>Motorcycle Maintenance</a>
-                            <a class="h5 mb-3" href="#"><i class="bi bi-arrow-right me-2"></i>Latest Models</a>
-                            <a class="h5 mb-3" href="#"><i class="bi bi-arrow-right me-2"></i>Riding Tips</a>
-                            <a class="h5 mb" href="#"><i class="bi bi-arrow-right me-2"></i>Market Updates</a>
-                        </div>
-                    </div>
-                    <div class="bg-light rounded p-4 mb-4">
-                        <h4 class="mb-3">Recent Posts</h4>
-                        <div class="d-flex mb-3">
-                            <img class="img-fluid rounded" src="/api/placeholder/80/80" alt="Recent Post" style="object-fit: cover;">
-                            <a href="" class="h5 d-flex align-items-center ms-3">How to Choose the Right Motorcycle for Beginners</a>
-                        </div>
-                        <div class="d-flex mb-3">
-                            <img class="img-fluid rounded" src="/api/placeholder/80/80" alt="Recent Post" style="object-fit: cover;">
-                            <a href="" class="h5 d-flex align-items-center ms-3">Understanding Interest Rates for Motorcycle Loans</a>
-                        </div>
-                        <div class="d-flex">
-                            <img class="img-fluid rounded" src="/api/placeholder/80/80" alt="Recent Post" style="object-fit: cover;">
-                            <a href="" class="h5 d-flex align-items-center ms-3">5 Tips to Maintain Your Motorcycle in Rainy Season</a>
-                        </div>
-                    </div>
-                </div> --}}
-                <!-- Blog Filter End -->
-                
+            <div class="row g-4">  
                 <!-- Blog List Start -->
                 <div class="col-lg-9 wow fadeInUp" data-wow-delay="0.5s">
                     <div class="row g-4">

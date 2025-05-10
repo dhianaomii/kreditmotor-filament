@@ -9,11 +9,11 @@
     <div class="container-fluid bg-breadcrumb">
         <div class="container text-center py-5" style="max-width: 900px;">
             <h4 class="text-white display-4 mb-4 wow fadeInDown" data-wow-delay="0.1s">About Us</h4>
-            <ol class="breadcrumb d-flex justify-content-center mb-0 wow fadeInDown" data-wow-delay="0.3s">
-                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            {{-- <ol class="breadcrumb d-flex justify-content-center mb-0 wow fadeInDown" data-wow-delay="0.3s">
+                <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                 <li class="breadcrumb-item"><a href="#">Pages</a></li>
                 <li class="breadcrumb-item active text-primary">About Us</li>
-            </ol>    
+            </ol>     --}}
         </div>
     </div>
     <!-- Header End -->
@@ -52,7 +52,7 @@
                             <p class="mb-0">Choose from 12 to 60 months</p>
                         </div>
                     </div>
-                    <a href="contact.html" class="btn btn-primary py-3 px-5 mt-3">Contact Us For Consultation</a>
+                    <a href="{{ route('contact')}}" class="btn btn-primary py-3 px-5 mt-3">Contact Us For Consultation</a>
                 </div>
                 <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
                     <div class="position-relative rounded overflow-hidden h-100" style="min-height: 400px;">
@@ -203,7 +203,7 @@
                 <div class="col-lg-6 text-center wow fadeInUp" data-wow-delay="0.3s">
                     <h1 class="display-5 mb-4 text-white">Ready to Ride Your Dream Motorcycle?</h1>
                     <p class="mb-4 text-white">Apply for motorcycle financing today and get on the road with your dream bike. Our team is standing by to assist you.</p>
-                    <a href="apply.html" class="btn btn-light py-3 px-5">Apply Now</a>
+                    <a href="{{route('product')}}" class="btn btn-light py-3 px-5">Apply Now</a>
                 </div>
             </div>
         </div>

@@ -42,12 +42,12 @@
           
           <div class="dropdown-divider"></div>
           
-          <a class="dropdown-item" href="#">
+          {{-- <a class="dropdown-item" href="#">
             <i class="ti-user text-primary me-2"></i> Profile
           </a>
           <a class="dropdown-item" href="#">
             <i class="ti-settings text-primary me-2"></i> Settings
-          </a>
+          </a> --}}
           
           <div class="dropdown-divider"></div>
           

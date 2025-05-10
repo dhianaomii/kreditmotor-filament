@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Motor;
+use App\Models\Blog;
 
 class HomeController extends Controller
 {
@@ -16,7 +17,8 @@ class HomeController extends Controller
 
         return view('home.index', [
             'title' => 'Home',
-            'data' => $Motors
+            'data' => $Motors,
+            'blog' => Blog::all()
         ]);
     }
 
