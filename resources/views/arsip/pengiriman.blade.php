@@ -7,7 +7,7 @@
         body { 
             font-family: Arial, sans-serif;
             margin: 10px;
-            font-size: 10px; /* Smaller font size */
+            font-size: 10px; /* Smaller font to fit more data */
         }
         table { 
             width: 100%;
@@ -51,11 +51,23 @@
             font-size: 9px;
             display: inline-block;
         }
+        .badge-danger { 
+            background-color: #dc3545;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 9px;
+            display: inline-block;
+        }
         h2 {
             margin-bottom: 10px;
             font-size: 14px;
         }
-        /* Using landscape orientation */
+        /* Format currency values */
+        .currency {
+            text-align: right;
+        }
+        /* Support for landscape orientation */
         @page {
             size: landscape;
         }
@@ -74,49 +86,41 @@
     <table>
         <thead>
             <tr>
-                <th width="9%">Status Kirim</th>
-                <th width="10%">No Invoice</th>
-                <th width="14%">Nama Pelanggan</th>
-                <th width="12%">Nama Kurir</th>
-                <th width="10%">No HP</th>
-                <th width="10%">Tanggal Pengiriman</th>
-                <th width="10%">Tanggal Tiba</th>
-                <th width="15%">Keterangan</th>
-                <th width="10%">Foto</th>
+                <th>Status Kirim</th>
+                <th>No Invoice</th>
+                <th>Nama Pelanggan</th>
+                <th>Nama Kurir</th>
+                <th>No HP</th>
+                <th>Tanggal Pengiriman</th>
+                <th>Tanggal Tiba</th>
+                <th>Keterangan</th>
+                <th>Foto</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($pengiriman as $i)
+            @forelse ($pengiriman as $i)
             <tr>
-                <td>
-                    @if($i->status_kirim == 'Sedang Dikirim')
-                    <span class="badge-warning">{{ $i->status_kirim }}</span>
-                    @else
-                    <span class="badge-success">{{ $i->status_kirim }}</span>
-                    @endif
-                </td>
+                <td>{{ $i->status_kirim }}</td>
                 <td>{{ $i->no_invoice }}</td>
                 <td>{{ $i->Kredit->PengajuanKredit->Pelanggan->nama_pelanggan }}</td>
                 <td>{{ $i->nama_kurir }}</td>
                 <td>{{ $i->telpon_kurir }}</td>
-                <td>{{ date('d/m/Y', strtotime($i->tgl_kirim)) }}</td>
+                <td>{{ $i->tgl_kirim }}</td>
+                <td>{{ $i->tgl_tiba }}</td>
+                <td>{{ $i->keterangan }}</td>
                 <td>
-                    @if($i->tgl_tiba)
-                    {{ date('d/m/Y', strtotime($i->tgl_tiba)) }}
+                    @if ($i->bukti_foto)
+                        <img src="{{ public_path('storage/' . $i->bukti_foto) }}" alt="Bukti Foto">
                     @else
-                    -
-                    @endif
-                </td>
-                <td>{{ $i->keterangan ?: '-' }}</td>
-                <td>
-                    @if(file_exists(public_path('storage/' . $i->bukti_foto)))
-                    <img src="{{ public_path('storage/' . $i->bukti_foto) }}" alt="Foto">
-                    @else
-                    <span>Tidak Ada Gambar</span>
+                        Tidak ada foto
                     @endif
                 </td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="9">Tidak ada data pengiriman untuk periode ini.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </body>
