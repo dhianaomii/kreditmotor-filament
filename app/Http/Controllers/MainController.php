@@ -33,16 +33,13 @@ class MainController extends Controller
         ]);
     }
 
-    public function getblog()
+    public function getblog(Request $request)
     {
-        $blog = Blog::where('status', 'published')->get();
-        // $relatedblog = Blog::where('id', '!=', $id)->limit(4)->get();
-
-        return view('c-blog.index' ,
-        [
-            'title' => 'Blog',
-            'blog' => $blog
-        ]);
+        $blog = Blog::with('user')
+                    ->orderBy('publish_at', 'desc')
+                    ->paginate(6); // Show 6 blog posts per page
+    
+        return view('c-blog.index', compact('blog'), ['title' => 'Blog']);
     }
 
     public function blogdetail($id)

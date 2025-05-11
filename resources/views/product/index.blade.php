@@ -140,6 +140,13 @@
                         </div>
                     </div>
                 </div>
+                @if($data->hasPages())
+                    <div class="row mt-5">
+                        <div class="col-12 d-flex justify-content-center">
+                            {{ $data->appends(request()->query())->links('vendor.pagination.bootstrap-4') }}
+                        </div>
+                    </div>
+                @endif
             @empty
                 <div class="col-12">
                     <p class="text-center">Tidak ada motor yang ditemukan.</p>

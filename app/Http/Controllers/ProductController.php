@@ -27,7 +27,7 @@ class ProductController extends Controller
             $query->where('jenis_motor_id', $request->jenis_motor);
         }
 
-        $data = $query->get();
+        $data = $query->paginate(12);
         $jenisMotors = JenisMotor::all();
 
         return view('product.index', compact('data', 'jenisMotors')
@@ -48,9 +48,14 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try {
+            Log::info('Pelanggan ID: ' . $request->pelanggan_id);
+
             $activePengajuan = PengajuanKredit::where('pelanggan_id', $request->pelanggan_id)
-                ->where('status_pengajuan', ['Menunggu Konfirmasi', 'Diproses', 'Menunggu Pembayaran'])
+                ->whereIn('status_pengajuan', ['Menunggu Konfirmasi', 'Diproses', 'Menunggu Pembayaran'])
                 ->count();
+
+            Log::info('Active Pengajuan Count: ' . $activePengajuan);
+
             if ($activePengajuan >= 1) {
                 return redirect()->back()->with('error', 'Anda telah mencapai batas maksimal pengajuan aktif.');
             }

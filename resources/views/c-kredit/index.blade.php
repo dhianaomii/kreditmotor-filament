@@ -5,7 +5,36 @@
 @endsection
 
 @section('content')
+<style>
+    .pagination {
+    margin: 20px 0;
+}
 
+.page-item.active .page-link {
+    background-color: #d33;
+    border-color: #d33;
+}
+
+.page-link {
+    color: #d33;
+    padding: 8px 16px;
+    margin: 0 4px;
+    border-radius: 4px;
+}
+
+.page-link:hover {
+    color: #a00;
+    background-color: #f8f9fa;
+}
+
+.page-item.disabled .page-link {
+    color: #6c757d;
+}
+
+.page-item.active .page-link {
+    color: white;
+}
+</style>
 
 <div class="container-fluid bg-breadcrumb">
     <div class="container text-center py-5" style="max-width: 900px;">
@@ -120,6 +149,10 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                             <!-- Pagination Links -->
+                             <div class="d-flex justify-content-center mt-4">
+                                {{ $pengajuan->links('vendor.pagination.bootstrap-4') }}
+                            </div>
                         </div>
                     @else
                         <div class="text-center py-5">
@@ -200,6 +233,10 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Pagination Links -->
+                                            {{-- <div class="d-flex justify-content-center mt-4">
+                                                {{ $pengajuan->links('vendor.pagination.bootstrap-4') }}
+                                            </div> --}}
                                         @else
                                             <span class="text-muted">Belum Ada Bukti Pengiriman</span>
                                         @endif

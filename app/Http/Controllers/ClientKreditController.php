@@ -10,13 +10,13 @@ use App\Models\Kredit;
 use App\Models\Motor;
 use App\Models\JenisCicilan;
 use App\Models\Pengirimans;
+use App\Models\Pelanggan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Events\KreditDibatalkan;
 use Midtrans\Config;
 use Midtrans\Snap;
-use Midtrans\Notification;
 
 class ClientKreditController extends Controller
 {
@@ -73,6 +73,7 @@ class ClientKreditController extends Controller
                 return response()->json(['error' => 'Jumlah DP tidak valid.'], 400);
             }
 
+            // Ambil data pelanggan
             $pelanggan = Auth::guard('pelanggan')->user();
             if (!$pelanggan) {
                 Log::error('Pelanggan not authenticated');
@@ -85,7 +86,7 @@ class ClientKreditController extends Controller
             }
 
             // Ambil tanggal mulai kredit dari request
-            $tglMulaiKredit = $request->query('tgl_mulai_kredit');
+            $tglMulaiKredit = $request->input('tgl_mulai_kredit');
             if (!$tglMulaiKredit) {
                 Log::error('Tanggal mulai kredit tidak diberikan');
                 return response()->json(['error' => 'Tanggal mulai kredit diperlukan.'], 400);
@@ -94,8 +95,47 @@ class ClientKreditController extends Controller
             $tglMulai = Carbon::parse($tglMulaiKredit);
             $tglSelesai = $tglMulai->copy()->addMonths($pengajuan->JenisCicilan->lama_cicilan ?? 0);
 
+            // Ambil data alamat dari request
+            $alamatId = $request->input('alamat_id');
+            $newAlamat = $request->input('new_alamat');
+            $newKota = $request->input('new_kota');
+            $newProvinsi = $request->input('new_provinsi');
+            $newKodePos = $request->input('new_kode_pos');
+
+            // Simpan atau perbarui alamat ke tabel pelanggan
+            if ($alamatId === 'new' && $newAlamat && $newKota && $newProvinsi && $newKodePos) {
+                Log::info('New address submitted', ['new_alamat' => $newAlamat, 'new_kota' => $newKota, 'new_provinsi' => $newProvinsi, 'new_kode_pos' => $newKodePos]);
+                for ($i = 1; $i <= 3; $i++) {
+                    if (!$pelanggan->{"alamat$i"} || !$pelanggan->{"kota$i"} || !$pelanggan->{"provinsi$i"} || !$pelanggan->{"kode_pos$i"}) {
+                        $pelanggan->{"alamat$i"} = $newAlamat;
+                        $pelanggan->{"kota$i"} = $newKota;
+                        $pelanggan->{"provinsi$i"} = $newProvinsi;
+                        $pelanggan->{"kode_pos$i"} = $newKodePos;
+                        $pelanggan->save();
+                        Log::info('New address saved', ['pelanggan_id' => $pelanggan->id, 'alamat_slot' => $i]);
+                        break;
+                    }
+                }
+            } elseif ($alamatId && $alamatId >= 1 && $alamatId <= 3) {
+                Log::info('Existing address selected', ['alamat_id' => $alamatId]);
+            }
+
+            // Tentukan alamat untuk Midtrans
+            $address = $alamatId && $alamatId >= 1 && $alamatId <= 3
+                ? $pelanggan->{"alamat$alamatId"}
+                : ($newAlamat ?? '');
+            $city = $alamatId && $alamatId >= 1 && $alamatId <= 3
+                ? $pelanggan->{"kota$alamatId"}
+                : ($newKota ?? '');
+            $postalCode = $alamatId && $alamatId >= 1 && $alamatId <= 3
+                ? $pelanggan->{"kode_pos$alamatId"}
+                : ($newKodePos ?? '');
+            $province = $alamatId && $alamatId >= 1 && $alamatId <= 3
+                ? $pelanggan->{"provinsi$alamatId"}
+                : ($newProvinsi ?? '');
+
             // Gunakan pengajuan_kredit_id sebagai bagian dari order_id
-            $orderId = 'DP-' . $pengajuan->id;
+            $orderId = 'DP-' . $pengajuan->id . '-' . time();
             Log::info('Order ID generated', ['orderId' => $orderId]);
 
             // Cek atau buat data kredit
@@ -147,9 +187,11 @@ class ClientKreditController extends Controller
                     'first_name' => $pelanggan->nama_pelanggan,
                     'email' => $pelanggan->email,
                     'phone' => $pelanggan->no_hp ?? '081234567890',
-                ],
-                'callbacks' => [
-                    'finish' => route('pengajuan'), // Redirect ke halaman pengajuan setelah pembayaran
+                    'address' => $address,
+                    'city' => $city,
+                    'postal_code' => $postalCode,
+                    'province' => $province,
+                    'country_code' => 'IDN',
                 ],
             ];
             Log::info('Midtrans params', ['params' => $params]);
@@ -177,90 +219,91 @@ class ClientKreditController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-    
+
     /**
-    * Menangani callback dari Midtrans
-    */
-    public function handleCallback(Request $request)
+     * Update status pembayaran setelah sukses dari client-side
+     */
+    public function updatePaymentStatus(Request $request)
     {
         try {
-            Log::info('Raw callback request', ['body' => $request->all()]);
-
-            $notif = new Notification();
-
-            $transaction = $notif->transaction_status;
-            $orderId = $notif->order_id;
-            $fraud = $notif->fraud_status;
-            $paymentType = $notif->payment_type;
-
-             // Ambil data bank dari va_numbers jika ada
-            $bank = null;
-            $vaNumber = null;
-            if (isset($notif->va_numbers) && is_array($notif->va_numbers) && !empty($notif->va_numbers)) {
-                $vaData = $notif->va_numbers[0] ?? null; // Ambil data VA pertama
-                if (is_object($vaData)) {
-                    $bank = $vaData->bank ?? null; // Misalnya "bca"
-                    $vaNumber = $vaData->va_number ?? null; // Misalnya "34599548772426185449646"
-                }
+            $orderId = $request->input('order_id');
+            if (!$orderId) {
+                Log::error('Missing order_id', ['request' => $request->all()]);
+                return response()->json(['error' => 'Order ID diperlukan.'], 400);
             }
 
-            $merchantId = $notif->merchant_id ?? null; // Ambil merchant_id jika ada
+            $transactionStatus = $request->input('transaction_status');
+            if (!$transactionStatus) {
+                Log::error('Missing transaction_status', ['request' => $request->all()]);
+                return response()->json(['error' => 'Status transaksi diperlukan.'], 400);
+            }
 
-            Log::info('Received Midtrans callback', [
-                'transaction_status' => $transaction,
+            $paymentType = $request->input('payment_type', ''); // Default ke string kosong jika null
+            $vaNumbers = $request->input('va_numbers', []);
+
+            Log::info('Updating payment status from client', [
                 'order_id' => $orderId,
-                'fraud_status' => $fraud,
+                'transaction_status' => $transactionStatus,
                 'payment_type' => $paymentType,
-                'bank' => $bank,
-                'va_number' => $vaNumber,
-                'merchant_id' => $merchantId,
+                'va_numbers' => $vaNumbers,
+                'request_all' => $request->all(),
             ]);
-
-            // Validasi signature key
-            $localSignature = hash('sha512', $notif->order_id . $notif->status_code . $notif->gross_amount . config('services.midtrans.server_key'));
-            if ($localSignature !== $notif->signature_key) {
-                Log::error('Invalid signature key', ['order_id' => $orderId, 'expected' => $localSignature, 'received' => $notif->signature_key]);
-                return response()->json(['status' => 'Invalid signature'], 403);
-            }
 
             // Cari kredit berdasarkan order_id
             $kredit = Kredit::where('order_id', $orderId)->first();
             if (!$kredit) {
                 Log::error('Kredit not found', ['order_id' => $orderId]);
-                return response()->json(['status' => 'Kredit not found'], 404);
+                return response()->json(['error' => 'Kredit tidak ditemukan.'], 404);
             }
 
-            // Update status pembayaran dan pengajuan
-            $pengajuan = PengajuanKredit::find($kredit->pengajuan_kredit_id); 
+            $pengajuan = PengajuanKredit::find($kredit->pengajuan_kredit_id);
             if (!$pengajuan) {
                 Log::error('Pengajuan not found', ['pengajuan_kredit_id' => $kredit->pengajuan_kredit_id]);
-                return response()->json(['status' => 'Pengajuan not found'], 404);
+                return response()->json(['error' => 'Pengajuan tidak ditemukan.'], 404);
             }
 
-            // Normalisasi payment_type dari Midtrans menjadi nama yang lebih readable
+            // Normalisasi payment_type
             $paymentMethodName = $this->normalizePaymentType($paymentType);
-            $tempatBayar = $bank ? "Bank $bank" : null;
-
-            // Cari atau buat metode pembayaran berdasarkan tempat_bayar
-            $metodePembayaran = MetodePembayaran::where('tempat_bayar', $tempatBayar)->first();
-            if ($metodePembayaran) {
-                Log::info('Payment method found by tempat_bayar', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
-            } else {
-                $metodePembayaran = MetodePembayaran::create([
-                    'metode_pembayaran' => $paymentMethodName,
-                    'tempat_bayar' => $tempatBayar,
-                    'no_rekening' => null, // Tetap null sesuai permintaan
-                    'logo' => null,
-                ]);
-                Log::info('New payment method created', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
+            $tempatBayar = null;
+            $vaNumber = null;
+            if (!empty($vaNumbers) && is_array($vaNumbers)) {
+                $vaData = $vaNumbers[0] ?? null;
+                if (is_array($vaData)) {
+                    $tempatBayar = isset($vaData['bank']) ? "Bank " . strtoupper($vaData['bank']) : null;
+                    $vaNumber = $vaData['va_number'] ?? null;
+                } else {
+                    Log::warning('va_numbers format invalid', ['va_numbers' => $vaNumbers]);
+                }
             }
 
-            // Update metode_pembayaran_id di kredit
-            $kredit->metode_pembayaran_id = $metodePembayaran->id;
-            $kredit->save();
-            Log::info('Updated metode_pembayaran_id in kredit', ['kredit_id' => $kredit->id, 'metode_pembayaran_id' => $metodePembayaran->id]);
+            // Cari atau buat metode pembayaran
+            $metodePembayaran = null;
+            if ($tempatBayar) {
+                $metodePembayaran = MetodePembayaran::where('tempat_bayar', $tempatBayar)->first();
+                if (!$metodePembayaran) {
+                    $metodePembayaran = MetodePembayaran::create([
+                        'metode_pembayaran' => $paymentMethodName,
+                        'tempat_bayar' => $tempatBayar,
+                        'no_rekening' => $vaNumber,
+                        'logo' => null,
+                    ]);
+                    Log::info('New payment method created', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
+                } else {
+                    Log::info('Payment method found by tempat_bayar', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
+                }
+            } else {
+                Log::warning('No tempat_bayar defined, skipping MetodePembayaran creation', ['payment_type' => $paymentType]);
+            }
 
-            if ($transaction == 'capture' && $fraud == 'accept') {
+            // Update metode_pembayaran_id di kredit jika ada
+            if ($metodePembayaran) {
+                $kredit->metode_pembayaran_id = $metodePembayaran->id;
+            }
+
+            // Update status berdasarkan transaction_status dari Midtrans
+            $isSuccess = false;
+            if (in_array($transactionStatus, ['success', 'settlement', 'capture'])) {
+                $isSuccess = true;
                 $kredit->payment_status = 'paid';
                 $kredit->status_kredit = 'Dicicil';
                 $kredit->save();
@@ -269,20 +312,11 @@ class ClientKreditController extends Controller
                 $pengajuan->status_pengajuan = 'Diterima';
                 $pengajuan->save();
                 Log::info('Pengajuan status updated to Diterima', ['pengajuan_id' => $pengajuan->id]);
-            } elseif ($transaction == 'settlement') {
-                $kredit->payment_status = 'paid';
-                $kredit->status_kredit = 'Dicicil';
-                $kredit->save();
-                Log::info('Payment status updated to paid', ['kredit_id' => $kredit->id]);
-
-                $pengajuan->status_pengajuan = 'Diterima';
-                $pengajuan->save();
-                Log::info('Pengajuan status updated to Diterima', ['pengajuan_id' => $pengajuan->id]);
-            } elseif ($transaction == 'pending') {
+            } elseif ($transactionStatus === 'pending') {
                 $kredit->payment_status = 'pending';
                 $kredit->save();
                 Log::info('Payment status updated to pending', ['kredit_id' => $kredit->id]);
-            } elseif ($transaction == 'deny' || $transaction == 'cancel') {
+            } elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire'])) {
                 $kredit->payment_status = 'failed';
                 $kredit->status_kredit = 'Dicicil';
                 $kredit->save();
@@ -291,22 +325,23 @@ class ClientKreditController extends Controller
                 $pengajuan->status_pengajuan = 'Menunggu Pembayaran';
                 $pengajuan->save();
                 Log::info('Pengajuan status updated to Menunggu Pembayaran', ['pengajuan_id' => $pengajuan->id]);
-            } elseif ($transaction == 'expire') {
-                $kredit->payment_status = 'expired';
-                $kredit->status_kredit = 'Dicicil';
-                $kredit->save();
-                Log::info('Payment status updated to expired', ['kredit_id' => $kredit->id]);
-
-                $pengajuan->status_pengajuan = 'Menunggu Pembayaran';
-                $pengajuan->save();
-                Log::info('Pengajuan status updated to Menunggu Pembayaran', ['pengajuan_id' => $pengajuan->id]);
+            } else {
+                Log::warning('Invalid transaction status from client', ['order_id' => $orderId, 'status' => $transactionStatus]);
+                return response()->json(['error' => 'Status transaksi tidak valid.'], 400);
             }
 
-            Log::info('Callback processed successfully', ['order_id' => $orderId, 'status' => $transaction]);
-            return response()->json(['status' => 'success']);
+            if ($isSuccess) {
+                return response()->json(['status' => 'success']);
+            }
+            return response()->json(['status' => 'pending']);
         } catch (\Exception $e) {
-            Log::error('Callback handling failed', ['error' => $e->getMessage(), 'order_id' => $notif->order_id ?? 'N/A']);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Failed to update payment status', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'order_id' => $request->input('order_id'),
+                'request_all' => $request->all(),
+            ]);
+            return response()->json(['error' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
         }
     }
     
@@ -344,9 +379,11 @@ class ClientKreditController extends Controller
 
         $pelangganId = Auth::guard('pelanggan')->id();
 
+        // Add orderBy('created_at', 'desc') and paginate()
         $pengajuan = PengajuanKredit::with(['Motor', 'JenisCicilan', 'Kredit'])
             ->where('pelanggan_id', $pelangganId)
-            ->get();
+            ->orderBy('created_at', 'desc')
+            ->paginate(10); // 10 items per page
 
         $pengiriman = Pengirimans::whereHas('Kredit.PengajuanKredit', function ($query) use ($pelangganId) {
             $query->where('pelanggan_id', $pelangganId);
@@ -366,8 +403,8 @@ class ClientKreditController extends Controller
             ->where('pelanggan_id', Auth::guard('pelanggan')->id())
             ->where('id', $pengajuanId)
             ->firstOrFail();
-
-        return view('c-kredit.create', compact('pengajuan'))
+        $pelanggan = Auth::guard('pelanggan')->user();
+        return view('c-kredit.create', compact('pengajuan', 'pelanggan'))
             ->with('title', 'Pembayaran Kredit');
     }
 
@@ -402,7 +439,7 @@ class ClientKreditController extends Controller
                 }
                 $keterangan = $request->input('keterangan_status_pengajuan', 'Ditolak oleh admin');
                 $newStatus = 'Dibatalkan Penjual';
-                $successMessage = 'Pengajuan berhasil ditolak dan stok telah dikembalikan.';
+                $successMessage = 'Pengajuan berhasil ditolak dan stok telah dikembalian.';
             } else {
                 return redirect()->route('pengajuan')->with('error', 'Aksi tidak valid.');
             }

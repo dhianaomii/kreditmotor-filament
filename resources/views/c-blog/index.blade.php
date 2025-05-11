@@ -55,14 +55,13 @@
                     </div>
                 </div>
                 <!-- Pagination Start -->
+                @if($blog->hasPages())
                 <div class="col-12">
                     <div class="pagination d-flex justify-content-center mt-5">
-                        <a href="#" class="rounded mx-2 active">1</a>
-                        <a href="#" class="rounded mx-2">2</a>
-                        <a href="#" class="rounded mx-2">3</a>
-                        <a href="#" class="rounded mx-2"><i class="bi bi-arrow-right"></i></a>
+                        {{ $blog->links('vendor.pagination.bootstrap-4') }}
                     </div>
                 </div>
+                @endif
                 <!-- Pagination End -->
                 <!-- Blog List End -->
             </div>

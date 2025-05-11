@@ -55,15 +55,22 @@ Route::get('product/{id}', [ProductController::class, 'show'])->name('product.sh
 Route::get('product/{id}/create', [ProductController::class, 'create'])->name('product.create')->middleware('auth:pelanggan'); // menampilkan halaman form tambah pengajuan kredit
 Route::post('product', [ProductController::class, 'store'])->name('product.store')->middleware('auth:pelanggan'); // eksekusi tambah pengajuan kredit
 
+// Route untuk menampilkan daftar pengajuan
 Route::get('pengajuan', [ClientKreditController::class, 'index'])->name('pengajuan')->middleware('auth:pelanggan');
+
+// Route untuk menampilkan form pembayaran
 Route::get('pengajuan/{pengajuanId}/create', [ClientKreditController::class, 'create'])->name('pengajuan.create')->middleware('auth:pelanggan');
+
+// Route untuk membatalkan pengajuan
 Route::patch('pengajuan/{id}/cancel', [ClientKreditController::class, 'updateStatus'])->name('pengajuan.cancel')->middleware('auth:pelanggan')
     ->defaults('action', 'cancel');
 
 // MIDTRANS DP
-Route::get('/pengajuan/snap-token/{pengajuanId}', [ClientKreditController::class, 'getSnapToken'])->name('pengajuan.snap-token')->middleware('auth:pelanggan');
-Route::post('/pengajuan/update-status/{id}/{action}', [ClientKreditController::class, 'updateStatus'])->name('pengajuan.update-status')->middleware('auth:pelanggan');
-Route::post('/pengajuan/callback', [ClientKreditController::class, 'handleCallback'])->name('pengajuan.callback');
+// Route untuk mendapatkan Snap Token (hanya POST karena kita mengirimkan data)
+Route::post('/pengajuan/snap-token/{pengajuanId}', [ClientKreditController::class, 'getSnapToken'])->middleware('auth:pelanggan')->name('pengajuan.snap-token');
+
+// Route untuk memperbarui status pembayaran dari client-side
+Route::post('/pengajuan/update-payment-status', [ClientKreditController::class, 'updatePaymentStatus'])->middleware('auth:pelanggan')->name('pengajuan.update-payment-status');
 
 Route::get('cicilan/{id}', [ClientAngsuranController::class, 'show'])->name('cicilan')->middleware('auth:pelanggan'); // menampilkan halaman angsuran sesuai dengan user yang login
 Route::post('cicilan/{pengajuanId}', [ClientAngsuranController::class, 'store'])->name('cicilan.store')->middleware('auth:pelanggan'); // eksekusi simpan angsuran
