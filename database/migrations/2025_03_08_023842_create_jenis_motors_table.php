@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('merk', 50);
             $table->enum('jenis', ['Bebek', 'Skuter', 'Dual Sport', 'Naked Sport', 'Sport Bike', 'Retro', 'Cruiser', 'Sport Touring', 'Dirt Bike', 'Motorcross', ' Scrambler', 'ATV', 'Motor Adventure', 'Lainnya']);
-            $table->string('deskripsi_jenis');
+            $table->text('deskripsi_jenis');
             $table->string('image');
             $table->timestamps();
         });

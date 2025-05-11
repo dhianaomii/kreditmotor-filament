@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_pelanggan')->unique();
             $table->string('email')->unique();
-            $table->string('password',15);
+            $table->string('password',60);
             $table->string('no_hp', 15)->unique();
             $table->string('alamat1')->nullable();
             $table->string('kota1')->nullable();

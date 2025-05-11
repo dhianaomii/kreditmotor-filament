@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('jenis_motor_id');
             $table->foreign('jenis_motor_id')->references('id')->on('jenis_motors');
             $table->integer('harga_jual');
-            $table->string('deskripsi_motor');
+            $table->text('deskripsi_motor');
             $table->string('warna', 50);
             $table->string('kapasitas_mesin', 10);
             $table->string('tahun_produksi', 4);

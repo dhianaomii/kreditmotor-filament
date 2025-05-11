@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('metode_pembayaran', 30);
             $table->string('tempat_bayar', 50);
             $table->string('no_rekening', 25)->unique();
-            $table->string('logo');
+            $table->string('logo')->nullable();
             $table->timestamps();
         });
     }
