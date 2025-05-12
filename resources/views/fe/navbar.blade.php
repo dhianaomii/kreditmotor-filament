@@ -40,9 +40,9 @@
                                 <i class="fas fa-search"></i>
                             </button>
                             <!-- Tombol Keranjang Belanja -->
-                            <a href="{{route('pengajuan')}}" class="btn btn-primary btn-md-square me-2">
+                            {{-- <a href="{{route('pengajuan')}}" class="btn btn-primary btn-md-square me-2">
                                 <i class="bi bi-cart"></i>
-                            </a>
+                            </a> --}}
                             <div class="dropdown">
                                 <a href="#" class="btn btn-primary dropdown-toggle" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ Auth::guard('pelanggan')->user()->nama_pelanggan }}
@@ -126,7 +126,13 @@
                             <a href="{{ route('blog') }}" class="nav-item nav-link  @if (@isset($title) and $title === 'Blog') active @endif">Blogs</a>
                             <a href="{{ route('contact') }}" class="nav-item nav-link  @if (@isset($title) and $title === 'Contact') active @endif">Contact</a>
                         </div>
-                    </div>                    
+                    </div>
+                    <a href="{{route('login')}}" class="btn btn-primary me-2">
+                        {{-- <i class="bi bi-cart"></i> --}}Login
+                    </a>
+                    <a href="{{route('register')}}" class="btn btn-primary me-2">
+                        {{-- <i class="bi bi-cart"></i> --}}Register
+                    </a>                    
                 </nav>
             </div>
         </div>
