@@ -26,10 +26,14 @@
                         </div>
 
                         <div class="d-grid mb-4">
-                            <div class="form-floating">
+                            <div class="form-floating position-relative">
                                 <input type="password" class="form-control border-0 bg-white text-black" 
                                        id="password" name="password" placeholder="Password" required>
                                 <label for="password" class="text-muted">Password</label>
+                                <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted" 
+                                        onclick="togglePassword()">
+                                    <i class="bi bi-eye-slash fs-5 p-4" id="toggleIcon"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -49,4 +53,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            }
+        }
+    </script>
 </body>
