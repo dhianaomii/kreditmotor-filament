@@ -240,14 +240,24 @@ class ClientKreditController extends Controller
 
             $paymentType = $request->input('payment_type', ''); // Default ke string kosong jika null
             $vaNumbers = $request->input('va_numbers', []);
+            $selectedAddress = $request->input('selected_address', []); // Get selected address
 
             Log::info('Updating payment status from client', [
                 'order_id' => $orderId,
                 'transaction_status' => $transactionStatus,
                 'payment_type' => $paymentType,
                 'va_numbers' => $vaNumbers,
+                'selected_address' => $selectedAddress,
                 'request_all' => $request->all(),
             ]);
+
+            // Store selected address in session if provided
+            if (!empty($selectedAddress)) {
+                session()->put('selected_address', $selectedAddress);
+                Log::info('Selected address stored in session', ['selected_address' => $selectedAddress]);
+            } else {
+                Log::warning('No selected address provided', ['order_id' => $orderId]);
+            }
 
             // Cari kredit berdasarkan order_id
             $kredit = Kredit::where('order_id', $orderId)->first();

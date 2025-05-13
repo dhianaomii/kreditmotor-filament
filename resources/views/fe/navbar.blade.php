@@ -36,9 +36,9 @@
                             <a href="{{ route('pengajuan') }}" class="nav-item nav-link  @if (@isset($title) and $title === 'Pengajuan Saya') active @endif">Kredit Saya</a>
                         </div>
                         <div class="d-flex align-items-center ms-lg-3 mt-2 mt-lg-0">
-                            <button class="btn btn-primary btn-md-square me-2" data-bs-toggle="modal" data-bs-target="#searchModal">
+                            {{-- <button class="btn btn-primary btn-md-square me-2" data-bs-toggle="modal" data-bs-target="#searchModal">
                                 <i class="fas fa-search"></i>
-                            </button>
+                            </button> --}}
                             <!-- Tombol Keranjang Belanja -->
                             {{-- <a href="{{route('pengajuan')}}" class="btn btn-primary btn-md-square me-2">
                                 <i class="bi bi-cart"></i>
@@ -141,7 +141,7 @@
 @endguest
 
 {{-- Modal Search (selalu tampil) --}}
-<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{{-- <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content rounded-0">
             <div class="modal-header">
@@ -158,4 +158,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}

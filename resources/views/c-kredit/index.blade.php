@@ -7,33 +7,33 @@
 @section('content')
 <style>
     .pagination {
-    margin: 20px 0;
-}
+        margin: 20px 0;
+    }
 
-.page-item.active .page-link {
-    background-color: #d33;
-    border-color: #d33;
-}
+    .page-item.active .page-link {
+        background-color: #d33;
+        border-color: #d33;
+    }
 
-.page-link {
-    color: #d33;
-    padding: 8px 16px;
-    margin: 0 4px;
-    border-radius: 4px;
-}
+    .page-link {
+        color: #d33;
+        padding: 8px 16px;
+        margin: 0 4px;
+        border-radius: 4px;
+    }
 
-.page-link:hover {
-    color: #a00;
-    background-color: #f8f9fa;
-}
+    .page-link:hover {
+        color: #a00;
+        background-color: #f8f9fa;
+    }
 
-.page-item.disabled .page-link {
-    color: #6c757d;
-}
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
 
-.page-item.active .page-link {
-    color: white;
-}
+    .page-item.active .page-link {
+        color: white;
+    }
 </style>
 
 <div class="container-fluid bg-breadcrumb">
@@ -149,8 +149,8 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                             <!-- Pagination Links -->
-                             <div class="d-flex justify-content-center mt-4">
+                            <!-- Pagination Links -->
+                            <div class="d-flex justify-content-center mt-4">
                                 {{ $pengajuan->links('vendor.pagination.bootstrap-4') }}
                             </div>
                         </div>
@@ -203,7 +203,16 @@
                                     <td>
                                         {{ $item->tgl_kirim ? \Carbon\Carbon::parse($item->tgl_kirim)->format('d M Y') : '-' }}
                                     </td>
-                                    <td>{{Auth::user()->alamat1}}, {{Auth::user()->kota1}}, {{Auth::user()->provinsi1}}, {{Auth::user()->kode_pos1}}</td>
+                                    <td>
+                                        @if (session('selected_address'))
+                                            {{ session('selected_address.alamat') }}, {{ session('selected_address.kota') }}, {{ session('selected_address.provinsi') }}, {{ session('selected_address.kode_pos') }}
+                                            @php
+                                                session()->forget('selected_address'); // Clear session after display
+                                            @endphp
+                                        @else
+                                            {{ Auth::user()->alamat1 ?? '-' }}, {{ Auth::user()->kota1 ?? '-' }}, {{ Auth::user()->provinsi1 ?? '-' }}, {{ Auth::user()->kode_pos1 ?? '-' }}
+                                        @endif
+                                    </td>
                                     <td>
                                         <span class="badge bg-{{ $item->status_kirim == 'Tiba Ditujuan' ? 'success' : ($item->status_kirim == 'Sedang Dikirim' ? 'primary' : 'primary') }} p-2">
                                             {{ $item->status_kirim ?? '-' }}
@@ -233,10 +242,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- Pagination Links -->
-                                            {{-- <div class="d-flex justify-content-center mt-4">
-                                                {{ $pengajuan->links('vendor.pagination.bootstrap-4') }}
-                                            </div> --}}
                                         @else
                                             <span class="text-muted">Belum Ada Bukti Pengiriman</span>
                                         @endif
@@ -259,77 +264,52 @@
         </div>
     </div>
 
-  <!-- SweetAlert untuk konfirmasi pembatalan dengan input alasan -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.cancel-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const pengajuanId = this.getAttribute('data-id');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Konfirmasi Pembatalan',
-                    text: 'Masukkan alasan pembatalan pengajuan ini:',
-                    input: 'textarea',
-                    inputPlaceholder: 'Tuliskan alasan pembatalan...',
-                    inputAttributes: {
-                        'required': true,
-                        'minlength': 10
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Batalkan',
-                    cancelButtonText: 'Tidak',
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    preConfirm: (keterangan) => {
-                        if (!keterangan || keterangan.length < 10) {
-                            Swal.showValidationMessage('Alasan harus diisi minimal 10 karakter.');
-                            return false;
+    <!-- SweetAlert untuk konfirmasi pembatalan dengan input alasan -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.cancel-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const pengajuanId = this.getAttribute('data-id');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Konfirmasi Pembatalan',
+                        text: 'Masukkan alasan pembatalan pengajuan ini:',
+                        input: 'textarea',
+                        inputPlaceholder: 'Tuliskan alasan pembatalan...',
+                        inputAttributes: {
+                            'required': true,
+                            'minlength': 10
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Batalkan',
+                        cancelButtonText: 'Tidak',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        preConfirm: (keterangan) => {
+                            if (!keterangan || keterangan.length < 10) {
+                                Swal.showValidationMessage('Alasan harus diisi minimal 10 karakter.');
+                                return false;
+                            }
+                            return keterangan;
                         }
-                        return keterangan;
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const form = document.getElementById(`cancel-form-${pengajuanId}`);
-                        const keteranganInput = document.getElementById(`keterangan_status_pengajuan-${pengajuanId}`);
-                        keteranganInput.value = result.value;
-                        form.submit();
-                    }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const form = document.getElementById(`cancel-form-${pengajuanId}`);
+                            const keteranganInput = document.getElementById(`keterangan_status_pengajuan-${pengajuanId}`);
+                            keteranganInput.value = result.value;
+                            form.submit();
+                        }
+                    });
                 });
             });
         });
-    });
-</script>
-
-    <!-- Custom JavaScript -->
-    <script>
-        // Efek transisi fade-out untuk semua link dengan kelas 'read-more' dan tombol checkout
-        document.querySelectorAll('.read-more, .btn-red, .btn-outline-red').forEach(link => {
-            link.addEventListener('click', function(event) {
-                if (this.tagName === 'A' && !this.closest('form')) {
-                    event.preventDefault();
-                    const href = this.getAttribute('href');
-                    document.body.classList.add('fade-out');
-                    setTimeout(() => {
-                        window.location.href = href;
-                    }, 500);
-                }
-            });
-        });
-
-        // Script untuk menghilangkan spinner setelah halaman selesai dimuat
-        window.addEventListener('load', function () {
-            const spinner = document.getElementById('spinner');
-            if (spinner) {
-                spinner.classList.remove('show');
-            }
-        });
     </script>
+
     <!-- Custom JavaScript -->
     <script>
         // Efek transisi fade-out untuk semua link dengan kelas 'read-more' dan tombol checkout
         document.querySelectorAll('.read-more, .btn-red, .btn-outline-red').forEach(link => {
             link.addEventListener('click', function(event) {
-                // Hanya terapkan efek jika link adalah <a> atau bukan tombol hapus
                 if (this.tagName === 'A' && !this.closest('form')) {
                     event.preventDefault();
                     const href = this.getAttribute('href');

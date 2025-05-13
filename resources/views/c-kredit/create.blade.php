@@ -183,6 +183,7 @@
         const snapTokenUrl = "{{ $snapTokenUrl }}";
         const csrfToken = "{{ $csrfToken }}";
         const updatePaymentUrl = "{{ route('pengajuan.update-payment-status') }}";
+        const pelanggan = @json($pelanggan);
     
         // Fungsi untuk menghitung tanggal selesai
         function updateTanggalSelesai() {
@@ -277,6 +278,24 @@
                 return;
             }
     
+            // Prepare address data to store in session
+            let selectedAddress = {};
+            if (alamatId === 'new') {
+                selectedAddress = {
+                    alamat: newAlamat,
+                    kota: newKota,
+                    provinsi: newProvinsi,
+                    kode_pos: newKodePos
+                };
+            } else if (alamatId && pelanggan) {
+                selectedAddress = {
+                    alamat: pelanggan[`alamat${alamatId}`],
+                    kota: pelanggan[`kota${alamatId}`],
+                    provinsi: pelanggan[`provinsi${alamatId}`],
+                    kode_pos: pelanggan[`kode_pos${alamatId}`]
+                };
+            }
+    
             // Kirim data ke server untuk mendapatkan Snap Token
             const formData = new FormData();
             formData.append('pengajuan_kredit_id', {{ $pengajuan->id }});
@@ -323,7 +342,8 @@
                                     transaction_status: result.transaction_status || 'success',
                                     va_numbers: result.va_numbers || [],
                                     transaction_id: result.transaction_id || '',
-                                    gross_amount: result.gross_amount || ''
+                                    gross_amount: result.gross_amount || '',
+                                    selected_address: selectedAddress
                                 })
                             })
                             .then(response => response.json())
@@ -376,4 +396,4 @@
             });
         });
     });
-    </script>
+</script>
