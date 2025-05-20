@@ -87,7 +87,12 @@ Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     // Semua role diarahkan ke dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard'); // Tambahan: redirect root ke dashboard
-
+    Route::get('pelanggan', [MainController::class, 'getpelanggan'])->name('pelanggan');
+    Route::get('pengajuan-kredit', [MainController::class, 'getpengajuankredit'])->name('pengajuan-kredit');
+    Route::get('kredit', [MainController::class, 'getkredit'])->name('kredit');
+    Route::get('angsuran', [MainController::class, 'getangsuran'])->name('angsuran');
+    Route::get('blog-admin', [MainController::class, 'getblogadmin'])->name('blog-admin');
+    Route::get('pengiriman', [MainController::class, 'getpengiriman'])->name('pengiriman');
 });
     
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -106,17 +111,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/export/pengiriman/pdf', [ArsipController::class, 'exportPengirimanPdf'])->name('export.pengiriman.pdf');
 });
 
-Route::middleware(['auth', 'role:admin,ceo,marketing'])->group(function () {
-    Route::get('pelanggan', [MainController::class, 'getpelanggan'])->name('pelanggan');
-    Route::get('pengajuan-kredit', [MainController::class, 'getpengajuankredit'])->name('pengajuan-kredit');
-    Route::get('kredit', [MainController::class, 'getkredit'])->name('kredit');
-    Route::get('angsuran', [MainController::class, 'getangsuran'])->name('angsuran');
-    Route::get('blog-admin', [MainController::class, 'getblogadmin'])->name('blog-admin');
-});
+// Route::middleware(['auth', 'role:admin,ceo,marketing'])->group(function () {
+    // Route::get('pelanggan', [MainController::class, 'getpelanggan'])->name('pelanggan');
+    // Route::get('pengajuan-kredit', [MainController::class, 'getpengajuankredit'])->name('pengajuan-kredit');
+    // Route::get('kredit', [MainController::class, 'getkredit'])->name('kredit');
+    // Route::get('angsuran', [MainController::class, 'getangsuran'])->name('angsuran');
+    // Route::get('blog-admin', [MainController::class, 'getblogadmin'])->name('blog-admin');
+// });
 
-Route::middleware(['auth', 'role:admin,ceo,kurir'])->group(function () {
-    Route::get('pengiriman', [MainController::class, 'getpengiriman'])->name('pengiriman');
-});
+// Route::middleware(['auth', 'role:admin,ceo,kurir'])->group(function () {
+    // Route::get('pengiriman', [MainController::class, 'getpengiriman'])->name('pengiriman');
+// });
 
 
 

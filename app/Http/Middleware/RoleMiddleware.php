@@ -23,5 +23,5 @@ class RoleMiddleware
 
         // Kalo ga sesuai balik lagi ke halaman sebelumnya dengan pesan error
         return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman tersebut!');
-        }
+    }
 }
