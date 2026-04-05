@@ -99,6 +99,9 @@ class ClientPengirimanController extends Controller
             // Periksa apakah kredit ada dan sudah lunas
             $kredit = Kredit::where('id', $request->kredit_id)
                 ->where('pengajuan_kredit_id', $pengajuanKreditId)
+                ->whereHas('PengajuanKredit', function($q) use ($pelanggan) {
+                    $q->where('pelanggan_id', $pelanggan->id);
+                })
                 ->firstOrFail();
 
             if ($kredit->status_kredit !== 'Lunas') {

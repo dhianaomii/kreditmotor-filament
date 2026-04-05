@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Kredit extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'kredits';
     
@@ -23,6 +25,7 @@ class Kredit extends Model
         'sisa_kredit',
         'keterangan_status_kredit',      
         'order_id',
+        'transaction_id',
         'payment_status',
         'snap_token'
     ];

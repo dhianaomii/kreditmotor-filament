@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Events\KreditBaruDiajukan;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class PengajuanKredit extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected static function booted()
     {
         static::created(function ($pengajuanKredit) {

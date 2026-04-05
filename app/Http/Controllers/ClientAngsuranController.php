@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\PengajuanKredit;
-// use App\Models\Kredit;
 use App\Models\Kredit;
 use App\Models\Angsuran;
 use App\Models\MetodePembayaran;
@@ -13,17 +12,110 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
+/* MIDTRANS IMPORTS (Commented for now)
+use Midtrans\Config;
+use Midtrans\Snap;
+use App\Services\ReceiptService;
+*/
+
 class ClientAngsuranController extends Controller
 {
-    public function index()
+    /* MIDTRANS CONSTRUCTOR (Commented)
+    public function __construct()
     {
-        // Kosong sesuai kode asli
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = config('services.midtrans.is_sanitized');
+        Config::$is3ds = config('services.midtrans.is_3ds');
     }
+    */
 
-    public function create()
+    /* MIDTRANS GET SNAP TOKEN (Commented)
+    public function getSnapToken(Request $request, $pengajuanId)
     {
-        // Kosong sesuai kode asli
+        try {
+            $pengajuan = PengajuanKredit::findOrFail($pengajuanId);
+            $kredit = Kredit::where('pengajuan_kredit_id', $pengajuan->id)->firstOrFail();
+            $pelanggan = Auth::guard('pelanggan')->user();
+
+            if ($pengajuan->pelanggan_id !== $pelanggan->id) {
+                return response()->json(['error' => 'Akses ditolak.'], 403);
+            }
+
+            $bulan = $request->input('bulan');
+            $orderId = 'ANG-' . $kredit->id . '-' . str_replace('-', '', $bulan) . '-' . time();
+
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => (int) $pengajuan->cicilan_perbulan,
+                ],
+                'customer_details' => [
+                    'first_name' => $pelanggan->nama_pelanggan,
+                    'email' => $pelanggan->email,
+                    'phone' => $pelanggan->no_hp,
+                ],
+                'item_details' => [
+                    [
+                        'id' => 'ANG-' . $bulan,
+                        'price' => (int) $pengajuan->cicilan_perbulan,
+                        'quantity' => 1,
+                        'name' => 'Angsuran ' . $pengajuan->Motor->nama_motor . ' - ' . $bulan,
+                    ]
+                ]
+            ];
+
+            $snapToken = Snap::getSnapToken($params);
+
+            Angsuran::create([
+                'kredit_id' => $kredit->id,
+                'tgl_bayar' => $bulan,
+                'angsuran_ke' => $kredit->angsuran()->count() + 1,
+                'total_bayar' => $pengajuan->cicilan_perbulan,
+                'order_id' => $orderId,
+                'keterangan' => 'Pending Midtrans - ' . $bulan,
+            ]);
+
+            return response()->json(['token' => $snapToken]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+    */
+
+    /* MIDTRANS CLIENT UPDATE (Commented)
+    public function updatePaymentStatus(Request $request)
+    {
+        try {
+            $orderId = $request->input('order_id');
+            $status = $request->input('transaction_status');
+            
+            $angsuran = Angsuran::where('order_id', $orderId)->first();
+            if (!$angsuran) return response()->json(['error' => 'Data tidak ditemukan'], 404);
+
+            if (in_array($status, ['capture', 'settlement', 'success'])) {
+                $angsuran->keterangan = 'Lunas (Midtrans)';
+                $angsuran->transaction_id = $request->input('transaction_id');
+                $angsuran->bukti_angsuran = ReceiptService::generateAngsuranReceipt($angsuran);
+                $angsuran->save();
+
+                $kredit = $angsuran->Kredit->fresh();
+                if ($kredit->sisa_kredit <= 0) {
+                    $kredit->status_kredit = 'Lunas';
+                    $kredit->save();
+                }
+                return response()->json(['status' => 'success']);
+            }
+            return response()->json(['status' => 'pending']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    */
+
+    public function index() { }
+
+    public function create() { }
 
     public function store(Request $request, $pengajuanId)
     {
@@ -55,11 +147,16 @@ class ClientAngsuranController extends Controller
             ]);
 
             $pengajuan = PengajuanKredit::findOrFail($pengajuanId);
+            
+            if ($pengajuan->pelanggan_id !== Auth::guard('pelanggan')->id()) {
+                return redirect()->route('pengajuan')->with('error', 'Akses ditolak.');
+            }
+
             $kredit = Kredit::where('pengajuan_kredit_id', $pengajuan->id)->firstOrFail();
-            Log::info('Data ditemukan', [
-                'pengajuan_id' => $pengajuan->id,
-                'kredit_id' => $kredit->id
-            ]);
+
+            if ($request->jumlah_bayar < $pengajuan->cicilan_perbulan) {
+                 return redirect()->back()->with('error', 'Jumlah bayar minimal Rp ' . number_format($pengajuan->cicilan_perbulan, 0, ',', '.'))->withInput();
+            }
 
             $angsuranTerakhir = Angsuran::where('kredit_id', $kredit->id)->latest()->first();
             $angsuranKe = $angsuranTerakhir ? $angsuranTerakhir->angsuran_ke + 1 : 1;
@@ -75,10 +172,9 @@ class ClientAngsuranController extends Controller
 
             $angsuran = Angsuran::create($data);
             
-            $totalAngsuran = Angsuran::where('kredit_id', $kredit->id)->count();
-            $lamaCicilan = $pengajuan->jenisCicilan->lama_cicilan;
+            $kredit = $kredit->fresh();
 
-            if ($totalAngsuran >= $lamaCicilan && $kredit->status_kredit !== 'Lunas') {
+            if ($kredit->sisa_kredit <= 0 && $kredit->status_kredit !== 'Lunas') {
                 $kredit->update([
                     'status_kredit' => 'Lunas',
                     'updated_at' => now(),
@@ -90,15 +186,7 @@ class ClientAngsuranController extends Controller
 
             return redirect()->route('cicilan', $pengajuan->id)
                 ->with('success', 'Pembayaran angsuran berhasil disimpan.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Log::error('Validasi gagal', ['errors' => $e->errors()]);
-            return redirect()->back()->withErrors($e->validator)->withInput();
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Log::error('Data tidak ditemukan', ['message' => $e->getMessage()]);
-            return redirect()->route('cicilan', $pengajuanId)
-                ->with('error', 'Pengajuan atau kredit tidak ditemukan.');
         } catch (\Exception $e) {
-            // Log::error('Gagal menyimpan angsuran', ['message' => $e->getMessage()]);
             return redirect()->route('cicilan', $pengajuanId)
                 ->with('error', 'Gagal menyimpan angsuran: ' . $e->getMessage());
         }
@@ -109,23 +197,17 @@ class ClientAngsuranController extends Controller
         try {
             $pelanggan = Auth::guard('pelanggan')->user();
 
-            Log::info('Mencari kredit untuk pengajuan_id', ['id' => $id]);
-    
             $kredit = Kredit::with(['angsuran', 'PengajuanKredit.motor', 'PengajuanKredit.jenisCicilan'])
                 ->where('pengajuan_kredit_id', $id)
+                ->whereHas('PengajuanKredit', function ($query) use ($pelanggan) {
+                    $query->where('pelanggan_id', $pelanggan->id);
+                })
                 ->first();
     
             if (!$kredit) {
-                Log::error('Kredit tidak ditemukan', ['pengajuan_kredit_id' => $id]);
                 return redirect()->route('pengajuan')
                     ->with('error', 'Kredit belum tersedia untuk pengajuan ini. Silakan hubungi administrator.');
             }
-    
-            Log::info('Menampilkan detail angsuran', [
-                'pengajuan_id' => $id,
-                'kredit_id' => $kredit->id,
-                'angsuran_count' => $kredit->angsuran->count()
-            ]);
     
             return view('c-angsuran.index', [
                 'kredit' => $kredit,
@@ -135,24 +217,8 @@ class ClientAngsuranController extends Controller
                 'pelanggan' => $pelanggan,
             ]);
         } catch (\Exception $e) {
-            Log::error('Gagal memuat detail angsuran', ['message' => $e->getMessage()]);
             return redirect()->route('pengajuan')
                 ->with('error', 'Gagal memuat detail angsuran: ' . $e->getMessage());
         }
-    }
-
-    public function edit(string $id)
-    {
-        //
-    }
-
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    public function destroy(string $id)
-    {
-        //
     }
 }

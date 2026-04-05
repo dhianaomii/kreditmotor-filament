@@ -142,6 +142,11 @@
                                                         <a href="{{ route('cicilan', $item->id) }}" class="btn btn-red">
                                                             <i class="bi bi-info-circle me-2"></i>Lihat Detail
                                                         </a>
+                                                        @if($item->Kredit && $item->Kredit->url_bukti_bayar)
+                                                            <a href="{{ asset('storage/' . $item->Kredit->url_bukti_bayar) }}" class="btn btn-outline-primary" target="_blank">
+                                                                <i class="bi bi-download me-2"></i>Struk DP
+                                                            </a>
+                                                        @endif
                                                     @endif
                                                 </div>
                                             </td>

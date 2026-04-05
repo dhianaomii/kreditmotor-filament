@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use App\Events\KreditDibatalkan;
 use Midtrans\Config;
 use Midtrans\Snap;
+use App\Services\ReceiptService;
 
 class ClientKreditController extends Controller
 {
@@ -220,11 +221,9 @@ class ClientKreditController extends Controller
         }
     }
 
-    /**
-     * Update status pembayaran setelah sukses dari client-side
-     */
     public function updatePaymentStatus(Request $request)
     {
+        Log::info('Entering updatePaymentStatus', ['request' => $request->all()]);
         try {
             $orderId = $request->input('order_id');
             if (!$orderId) {
@@ -238,120 +237,76 @@ class ClientKreditController extends Controller
                 return response()->json(['error' => 'Status transaksi diperlukan.'], 400);
             }
 
-            $paymentType = $request->input('payment_type', ''); // Default ke string kosong jika null
+            $paymentType = $request->input('payment_type', '');
             $vaNumbers = $request->input('va_numbers', []);
-            $selectedAddress = $request->input('selected_address', []); // Get selected address
+            $selectedAddress = $request->input('selected_address', []);
+            $transactionId = $request->input('transaction_id', '');
 
-            Log::info('Updating payment status from client', [
+            Log::info('Payment data extracted', [
                 'order_id' => $orderId,
-                'transaction_status' => $transactionStatus,
-                'payment_type' => $paymentType,
-                'va_numbers' => $vaNumbers,
-                'selected_address' => $selectedAddress,
-                'request_all' => $request->all(),
+                'status' => $transactionStatus,
+                'transaction_id' => $transactionId
             ]);
 
             // Store selected address in session if provided
             if (!empty($selectedAddress)) {
                 session()->put('selected_address', $selectedAddress);
                 Log::info('Selected address stored in session', ['selected_address' => $selectedAddress]);
-            } else {
-                Log::warning('No selected address provided', ['order_id' => $orderId]);
             }
 
             // Cari kredit berdasarkan order_id
             $kredit = Kredit::where('order_id', $orderId)->first();
             if (!$kredit) {
-                Log::error('Kredit not found', ['order_id' => $orderId]);
+                Log::error('Kredit not found for order_id', ['order_id' => $orderId]);
                 return response()->json(['error' => 'Kredit tidak ditemukan.'], 404);
             }
 
             $pengajuan = PengajuanKredit::find($kredit->pengajuan_kredit_id);
             if (!$pengajuan) {
-                Log::error('Pengajuan not found', ['pengajuan_kredit_id' => $kredit->pengajuan_kredit_id]);
+                Log::error('Pengajuan not found for kredit', ['kredit_id' => $kredit->id]);
                 return response()->json(['error' => 'Pengajuan tidak ditemukan.'], 404);
             }
 
-            // Normalisasi payment_type
-            $paymentMethodName = $this->normalizePaymentType($paymentType);
-            $tempatBayar = null;
-            $vaNumber = null;
-            if (!empty($vaNumbers) && is_array($vaNumbers)) {
-                $vaData = $vaNumbers[0] ?? null;
-                if (is_array($vaData)) {
-                    $tempatBayar = isset($vaData['bank']) ? "Bank " . strtoupper($vaData['bank']) : null;
-                    $vaNumber = $vaData['va_number'] ?? null;
-                } else {
-                    Log::warning('va_numbers format invalid', ['va_numbers' => $vaNumbers]);
-                }
-            }
-
-            // Cari atau buat metode pembayaran
-            $metodePembayaran = null;
-            if ($tempatBayar) {
-                $metodePembayaran = MetodePembayaran::where('tempat_bayar', $tempatBayar)->first();
-                if (!$metodePembayaran) {
-                    $metodePembayaran = MetodePembayaran::create([
-                        'metode_pembayaran' => $paymentMethodName,
-                        'tempat_bayar' => $tempatBayar,
-                        'no_rekening' => $vaNumber,
-                        'logo' => null,
-                    ]);
-                    Log::info('New payment method created', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
-                } else {
-                    Log::info('Payment method found by tempat_bayar', ['metode_pembayaran' => $paymentMethodName, 'tempat_bayar' => $tempatBayar, 'id' => $metodePembayaran->id]);
-                }
-            } else {
-                Log::warning('No tempat_bayar defined, skipping MetodePembayaran creation', ['payment_type' => $paymentType]);
-            }
-
-            // Update metode_pembayaran_id di kredit jika ada
-            if ($metodePembayaran) {
-                $kredit->metode_pembayaran_id = $metodePembayaran->id;
-            }
-
-            // Update status berdasarkan transaction_status dari Midtrans
+            // Update status berdasarkan transaction_status
             $isSuccess = false;
             if (in_array($transactionStatus, ['success', 'settlement', 'capture'])) {
                 $isSuccess = true;
                 $kredit->payment_status = 'paid';
                 $kredit->status_kredit = 'Dicicil';
+                $kredit->transaction_id = $transactionId;
+                
+                Log::info('Generating DP receipt...');
+                try {
+                    $kredit->url_bukti_bayar = ReceiptService::generateDPReceipt($kredit);
+                    Log::info('DP receipt generated successfully', ['url' => $kredit->url_bukti_bayar]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to generate DP receipt', ['error' => $e->getMessage()]);
+                    // Don't fail the whole request if receipt generation fails, but log it
+                }
+                
                 $kredit->save();
-                Log::info('Payment status updated to paid', ['kredit_id' => $kredit->id]);
+                Log::info('Kredit record saved as paid');
 
                 $pengajuan->status_pengajuan = 'Diterima';
                 $pengajuan->save();
-                Log::info('Pengajuan status updated to Diterima', ['pengajuan_id' => $pengajuan->id]);
+                Log::info('Pengajuan status updated to Diterima');
             } elseif ($transactionStatus === 'pending') {
                 $kredit->payment_status = 'pending';
                 $kredit->save();
-                Log::info('Payment status updated to pending', ['kredit_id' => $kredit->id]);
             } elseif (in_array($transactionStatus, ['deny', 'cancel', 'expire'])) {
                 $kredit->payment_status = 'failed';
-                $kredit->status_kredit = 'Dicicil';
                 $kredit->save();
-                Log::info('Payment status updated to failed', ['kredit_id' => $kredit->id]);
-
                 $pengajuan->status_pengajuan = 'Menunggu Pembayaran';
                 $pengajuan->save();
-                Log::info('Pengajuan status updated to Menunggu Pembayaran', ['pengajuan_id' => $pengajuan->id]);
-            } else {
-                Log::warning('Invalid transaction status from client', ['order_id' => $orderId, 'status' => $transactionStatus]);
-                return response()->json(['error' => 'Status transaksi tidak valid.'], 400);
             }
 
-            if ($isSuccess) {
-                return response()->json(['status' => 'success']);
-            }
-            return response()->json(['status' => 'pending']);
+            return response()->json(['status' => $isSuccess ? 'success' : 'pending']);
         } catch (\Exception $e) {
-            Log::error('Failed to update payment status', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'order_id' => $request->input('order_id'),
-                'request_all' => $request->all(),
+            Log::error('CRITICAL ERROR in updatePaymentStatus', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-            return response()->json(['error' => 'Terjadi kesalahan di server: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Internal Server Error: ' . $e->getMessage()], 500);
         }
     }
     

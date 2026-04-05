@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Pengirimans;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Pelanggan extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $guard = 'pelanggan';
 
     protected $fillable = [

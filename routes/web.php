@@ -73,6 +73,12 @@ Route::post('/pengajuan/snap-token/{pengajuanId}', [ClientKreditController::clas
 Route::post('/pengajuan/update-payment-status', [ClientKreditController::class, 'updatePaymentStatus'])->middleware('auth:pelanggan')->name('pengajuan.update-payment-status');
 
 Route::get('cicilan/{id}', [ClientAngsuranController::class, 'show'])->name('cicilan')->middleware('auth:pelanggan'); // menampilkan halaman angsuran sesuai dengan user yang login
+
+/* ROUTES MIDTRANS ANGSURAN (Commented)
+Route::post('cicilan/snap-token/{pengajuanId}', [ClientAngsuranController::class, 'getSnapToken'])->name('cicilan.snap-token')->middleware('auth:pelanggan');
+Route::post('cicilan/update-payment-status', [ClientAngsuranController::class, 'updatePaymentStatus'])->name('cicilan.update-payment-status')->middleware('auth:pelanggan');
+*/
+
 Route::post('cicilan/{pengajuanId}', [ClientAngsuranController::class, 'store'])->name('cicilan.store')->middleware('auth:pelanggan'); // eksekusi simpan angsuran
 
 Route::get('kirim/{pengajuanId}/create', [ClientPengirimanController::class, 'create'])->name('kirim.create')->middleware('auth:pelanggan'); // menampilkan halaman form kirim angsuran
