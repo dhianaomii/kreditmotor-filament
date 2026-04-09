@@ -1,6 +1,5 @@
 FROM php:8.2-fpm
 
-# Install dependencies
 RUN apt-get update && apt-get install -y \
     nginx \
     nodejs \
@@ -14,7 +13,6 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl
 
-# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
@@ -25,17 +23,27 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN npm ci && npm run build
 
-# Nginx config
-RUN echo 'server { \
-    listen 80; \
-    root /app/public; \
-    index index.php; \
-    location / { try_files $uri $uri/ /index.php?$query_string; } \
-    location ~ \.php$ { fastcgi_pass 127.0.0.1:9000; fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name; include fastcgi_params; } \
-}' > /etc/nginx/sites-enabled/default
-
 RUN chmod -R 775 storage bootstrap/cache
 
-CMD php-fpm -D && nginx -g "daemon off;"
+# Startup script - baca $PORT dari Railway
+RUN echo '#!/bin/bash\n\
+php-fpm -D\n\
+sleep 2\n\
+sed -i "s/RAILWAY_PORT/$PORT/g" /etc/nginx/sites-enabled/default\n\
+nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
 
-EXPOSE 80
+RUN echo 'server {\n\
+    listen RAILWAY_PORT;\n\
+    root /app/public;\n\
+    index index.php;\n\
+    location / { try_files $uri $uri/ /index.php?$query_string; }\n\
+    location ~ \\.php$ {\n\
+        fastcgi_pass 127.0.0.1:9000;\n\
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;\n\
+        include fastcgi_params;\n\
+    }\n\
+}' > /etc/nginx/sites-enabled/default
+
+EXPOSE 8080
+
+CMD ["/bin/bash", "/start.sh"]
