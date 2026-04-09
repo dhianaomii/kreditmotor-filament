@@ -1,48 +1,43 @@
-FROM php:8.2-fpm
+FROM php:8.1-fpm
+
+WORKDIR /var/www/html
 
 RUN apt-get update && apt-get install -y \
+    build-essential \
+    libmcrypt-dev \
+    mariadb-client \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    locales \
+    jpegoptim optipng pngquant gifsicle \
+    vim \
+    unzip \
+    git \
+    curl \
+    libzip-dev \
+    zip \
+    libicu-dev \
     nginx \
     nodejs \
     npm \
-    unzip \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    libicu-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip intl
+    && apt-get clean && rm -rf /var/lib/apt/list/*
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN docker-php-ext-install pdo pdo_mysql gd zip intl
 
-WORKDIR /app
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN npm ci && npm run build
+RUN npm install && npm run build
 
+RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 775 storage bootstrap/cache
 
-# Startup script - baca $PORT dari Railway
-RUN echo '#!/bin/bash\n\
-php-fpm -D\n\
-sleep 2\n\
-sed -i "s/RAILWAY_PORT/$PORT/g" /etc/nginx/sites-enabled/default\n\
-nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
-
-RUN echo 'server {\n\
-    listen RAILWAY_PORT;\n\
-    root /app/public;\n\
-    index index.php;\n\
-    location / { try_files $uri $uri/ /index.php?$query_string; }\n\
-    location ~ \\.php$ {\n\
-        fastcgi_pass 127.0.0.1:9000;\n\
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;\n\
-        include fastcgi_params;\n\
-    }\n\
-}' > /etc/nginx/sites-enabled/default
+COPY docker/nginx.conf /etc/nginx/sites-enabled/default
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 8080
 
